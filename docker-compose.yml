@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: devpassword
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d
@@ -19,7 +19,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "16379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -29,8 +29,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "25672:5672"
+      - "35672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: app
       RABBITMQ_DEFAULT_PASS: devpassword
@@ -45,7 +45,7 @@ services:
       context: .
       dockerfile: cmd/mock-stt/Dockerfile
     ports:
-      - "8081:8081"
+      - "18081:8081"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081/health"]
       interval: 5s
@@ -57,7 +57,7 @@ services:
       context: .
       dockerfile: cmd/mock-llm/Dockerfile
     ports:
-      - "8082:8082"
+      - "18082:8082"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8082/health"]
       interval: 5s
@@ -69,7 +69,7 @@ services:
       context: .
       dockerfile: cmd/api/Dockerfile
     ports:
-      - "8080:8080"
+      - "18080:8080"
     environment:
       POSTGRES_DSN: postgres://app:devpassword@postgres:5432/aiplatform?sslmode=disable
       REDIS_ADDR: redis:6379
