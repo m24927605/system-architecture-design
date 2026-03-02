@@ -1,8 +1,8 @@
 # AI Processing Platform
 
-可擴充的 AI 任務處理平台 -- 整合語音轉文字 (STT) 與 LLM 文字摘要，支援 2000+ 並發任務處理的事件驅動微服務架構。
+A scalable AI task processing platform integrating Speech-to-Text (STT) and LLM-based text summarization, built on an event-driven microservice architecture supporting 2,000+ concurrent tasks.
 
-> 詳細架構設計請參閱 [ARCHITECTURE.md](./ARCHITECTURE.md)
+> For the full architecture design, see [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 ---
 
@@ -51,9 +51,9 @@ docker compose down
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/tasks` | 建立新任務（提交音訊處理）|
-| `GET` | `/api/v1/tasks/:id` | 查詢單一任務狀態與結果 |
-| `GET` | `/api/v1/tasks` | 列出最近 50 筆任務 |
+| `POST` | `/api/v1/tasks` | Create a new task (submit audio for processing) |
+| `GET` | `/api/v1/tasks/:id` | Query a single task's status and result |
+| `GET` | `/api/v1/tasks` | List the most recent 50 tasks |
 | `GET` | `/health` | Health check |
 
 ### Create Task Request
@@ -109,11 +109,11 @@ ai-processing-platform/
 ## Architecture Overview
 
 ```
-User → API Service → SQS (STT Queue) → STT Worker → Whisper → SQS (LLM Queue) → LLM Worker → vLLM → Done
+User -> API Service -> SQS (STT Queue) -> STT Worker -> Whisper -> SQS (LLM Queue) -> LLM Worker -> vLLM -> Done
                 ↕               ↕                                        ↕
            PostgreSQL        Redis                                  PostgreSQL
 ```
 
 Tech stack: **Go** (all services) + **PostgreSQL** + **Redis** + **RabbitMQ** (local) / **SQS** (prod) + **Docker**
 
-詳細架構說明、Mermaid 圖表、技術選型理由、部署策略請參閱 **[ARCHITECTURE.md](./ARCHITECTURE.md)**。
+For detailed architecture diagrams, Mermaid charts, technology selection rationale, and deployment strategy, see **[ARCHITECTURE.md](./ARCHITECTURE.md)**.
