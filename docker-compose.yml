@@ -40,5 +40,90 @@ services:
       timeout: 5s
       retries: 5
 
+  mock-stt:
+    build:
+      context: .
+      dockerfile: cmd/mock-stt/Dockerfile
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mock-llm:
+    build:
+      context: .
+      dockerfile: cmd/mock-llm/Dockerfile
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8082/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: cmd/api/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      POSTGRES_DSN: postgres://app:devpassword@postgres:5432/aiplatform?sslmode=disable
+      REDIS_ADDR: redis:6379
+      RABBITMQ_URL: amqp://app:devpassword@rabbitmq:5672/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  stt-worker:
+    build:
+      context: .
+      dockerfile: cmd/stt-worker/Dockerfile
+    environment:
+      POSTGRES_DSN: postgres://app:devpassword@postgres:5432/aiplatform?sslmode=disable
+      REDIS_ADDR: redis:6379
+      RABBITMQ_URL: amqp://app:devpassword@rabbitmq:5672/
+      STT_ENDPOINT: http://mock-stt:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      mock-stt:
+        condition: service_healthy
+
+  llm-worker:
+    build:
+      context: .
+      dockerfile: cmd/llm-worker/Dockerfile
+    environment:
+      POSTGRES_DSN: postgres://app:devpassword@postgres:5432/aiplatform?sslmode=disable
+      REDIS_ADDR: redis:6379
+      RABBITMQ_URL: amqp://app:devpassword@rabbitmq:5672/
+      LLM_ENDPOINT: http://mock-llm:8082
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      mock-llm:
+        condition: service_healthy
+
 volumes:
   postgres_data:
