@@ -11,6 +11,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.53",
     "@ai-sdk/openai": "^3.0.39",
+    "@ai-sdk/react": "^3.0.110",
     "@xyflow/react": "^12.10.1",
     "ai": "^6.0.108",
     "framer-motion": "^12.34.4",

@@ -7,6 +7,7 @@ import CostAnalysis from "@/components/sections/CostAnalysis";
 import TechSelection from "@/components/sections/TechSelection";
 import ArchitectureTraits from "@/components/sections/ArchitectureTraits";
 import DeploymentPipeline from "@/components/sections/DeploymentPipeline";
+import ChatWidget from "@/components/chat/ChatWidget";
 
 export default function Home() {
   return (
@@ -29,6 +30,7 @@ export default function Home() {
 
         <DeploymentPipeline />
       </main>
+      <ChatWidget />
     </>
   );
 }
