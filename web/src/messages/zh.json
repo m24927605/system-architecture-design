@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "overview": "總覽",
+    "architecture": "架構設計",
+    "taskFlow": "任務流程",
+    "capacity": "容量規劃",
+    "cost": "成本分析",
+    "tech": "技術選型",
+    "traits": "架構特性",
+    "deploy": "維運部署",
+    "demo": "即時展示"
+  },
+  "hero": {
+    "title": "AI 處理平台",
+    "subtitle": "三階段演進式架構，讓基礎設施隨業務規模成長",
+    "cta": "探索架構設計"
+  },
+  "architecture": {
+    "title": "架構演進",
+    "subtitle": "從 MVP 到 Scale — 基礎設施隨業務需求成長",
+    "phase1": "Phase 1: MVP",
+    "phase2": "Phase 2: Growth",
+    "phase3": "Phase 3: Scale",
+    "monthlyCost": "月成本",
+    "throughput": "處理吞吐量",
+    "compute": "運算平台",
+    "aiModels": "AI 模型",
+    "deployment": "部署策略"
+  },
+  "taskFlow": {
+    "title": "任務處理流程",
+    "subtitle": "從音檔上傳到摘要結果 — 完全非同步管線"
+  },
+  "capacity": {
+    "title": "容量規劃計算器",
+    "subtitle": "根據工作量計算 GPU 需求與成本",
+    "monthlyVolume": "月任務量",
+    "audioLength": "平均音檔長度（分鐘）",
+    "recommended": "建議階段",
+    "sttGpus": "STT GPU 數量",
+    "llmGpus": "LLM GPU 數量",
+    "estimatedCost": "預估月成本",
+    "managedCost": "vs 託管服務成本",
+    "savings": "節省"
+  },
+  "cost": {
+    "title": "成本交叉分析",
+    "subtitle": "自建 GPU 何時比託管服務便宜？",
+    "managed": "託管服務 (AWS Transcribe + Bedrock)",
+    "selfHosted": "自建 GPU",
+    "monthlyCost": "月成本 ($)",
+    "perTaskCost": "單任務成本 ($)",
+    "tasksPerMonth": "月任務量",
+    "crossoverPoint": "交叉點：~30-50K 任務/月"
+  },
+  "tech": {
+    "title": "技術選型",
+    "subtitle": "每個選擇都有取捨 — 以下是我們的決策理由",
+    "chosen": "選擇",
+    "alternatives": "替代方案",
+    "rationale": "決策理由"
+  },
+  "traits": {
+    "title": "架構特性",
+    "subtitle": "系統品質的六個維度",
+    "scalability": "擴展性",
+    "faultTolerance": "容錯機制",
+    "consistency": "資料一致性",
+    "latency": "延遲與效能",
+    "security": "安全性",
+    "observability": "可觀測性"
+  },
+  "deploy": {
+    "title": "維運與部署",
+    "subtitle": "從本地開發到生產環境的零停機 Canary 發布",
+    "dev": "Dev",
+    "staging": "Staging",
+    "prod": "Production",
+    "cicd": "CI/CD 管線",
+    "canary": "Canary 部署"
+  },
+  "chat": {
+    "title": "架構諮詢助理",
+    "placeholder": "詢問架構相關問題...",
+    "thinking": "思考中..."
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "overview": "Overview",
+    "architecture": "Architecture",
+    "taskFlow": "Task Flow",
+    "capacity": "Capacity",
+    "cost": "Cost Analysis",
+    "tech": "Technology",
+    "traits": "Characteristics",
+    "deploy": "Deployment",
+    "demo": "Demo"
+  },
+  "hero": {
+    "title": "AI Processing Platform",
+    "subtitle": "A 3-phase evolutionary architecture for scalable AI task processing",
+    "cta": "Explore Architecture"
+  },
+  "architecture": {
+    "title": "Architecture Evolution",
+    "subtitle": "From MVP to Scale — infrastructure grows with business demand",
+    "phase1": "Phase 1: MVP",
+    "phase2": "Phase 2: Growth",
+    "phase3": "Phase 3: Scale",
+    "monthlyCost": "Monthly Cost",
+    "throughput": "Throughput",
+    "compute": "Compute",
+    "aiModels": "AI Models",
+    "deployment": "Deployment"
+  },
+  "taskFlow": {
+    "title": "Task Processing Flow",
+    "subtitle": "From audio upload to summarized result — fully async pipeline"
+  },
+  "capacity": {
+    "title": "Capacity Planner",
+    "subtitle": "Calculate GPU requirements and costs for your workload",
+    "monthlyVolume": "Monthly Task Volume",
+    "audioLength": "Average Audio Length (min)",
+    "recommended": "Recommended Phase",
+    "sttGpus": "STT GPUs Needed",
+    "llmGpus": "LLM GPUs Needed",
+    "estimatedCost": "Estimated Monthly Cost",
+    "managedCost": "vs Managed Service Cost",
+    "savings": "Savings"
+  },
+  "cost": {
+    "title": "Cost Crossover Analysis",
+    "subtitle": "When does self-hosting GPU become cheaper than managed services?",
+    "managed": "Managed (AWS Transcribe + Bedrock)",
+    "selfHosted": "Self-Hosted (GPU)",
+    "monthlyCost": "Monthly Cost ($)",
+    "perTaskCost": "Per-Task Cost ($)",
+    "tasksPerMonth": "Tasks / Month",
+    "crossoverPoint": "Crossover: ~30-50K tasks/month"
+  },
+  "tech": {
+    "title": "Technology Selection",
+    "subtitle": "Every choice has a trade-off — here's why we chose what we did",
+    "chosen": "Chosen",
+    "alternatives": "Alternatives Considered",
+    "rationale": "Rationale"
+  },
+  "traits": {
+    "title": "Architecture Characteristics",
+    "subtitle": "Six dimensions of system quality",
+    "scalability": "Scalability",
+    "faultTolerance": "Fault Tolerance",
+    "consistency": "Data Consistency",
+    "latency": "Latency & Performance",
+    "security": "Security",
+    "observability": "Observability"
+  },
+  "deploy": {
+    "title": "Deployment & Operations",
+    "subtitle": "From local development to production with zero-downtime canary releases",
+    "dev": "Dev",
+    "staging": "Staging",
+    "prod": "Production",
+    "cicd": "CI/CD Pipeline",
+    "canary": "Canary Deployment"
+  },
+  "chat": {
+    "title": "Architecture Assistant",
+    "placeholder": "Ask about the architecture...",
+    "thinking": "Thinking..."
+  }
+}
