@@ -6,3 +6,4 @@ bin/
 vendor/
 *.pdf
 .claude/
+notes-zh/
