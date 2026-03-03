@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/sections/Hero";
+import ArchitectureEvolution from "@/components/sections/ArchitectureEvolution";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import GradientText from "@/components/ui/GradientText";
 import { useTranslations } from "next-intl";
@@ -13,10 +14,7 @@ export default function Home() {
       <main>
         <Hero />
 
-        <SectionWrapper id="architecture">
-          <h2 className="text-3xl font-bold mb-4"><GradientText>{t("architecture.title")}</GradientText></h2>
-          <p className="text-text-secondary">{t("architecture.subtitle")}</p>
-        </SectionWrapper>
+        <ArchitectureEvolution />
 
         <SectionWrapper id="task-flow">
           <h2 className="text-3xl font-bold mb-4"><GradientText>{t("taskFlow.title")}</GradientText></h2>
