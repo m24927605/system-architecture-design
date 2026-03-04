@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const architecturePath = path.join(process.cwd(), "..", "ARCHITECTURE.md");
+const architecturePath = path.join(process.cwd(), "docs", "ARCHITECTURE.md");
 
 let architectureContent: string;
 try {

@@ -55,10 +55,11 @@
   },
   "tech": {
     "title": "Technology Selection",
-    "subtitle": "Every choice has a trade-off — here's why we chose what we did",
-    "chosen": "Chosen",
-    "alternatives": "Alternatives Considered",
-    "rationale": "Rationale"
+    "subtitle": "Technology choices evolve with each phase — here's what we chose and why",
+    "phase1": "Phase 1: MVP",
+    "phase2": "Phase 2: Growth",
+    "phase3": "Phase 3: Scale",
+    "alternatives": "Alternatives Considered"
   },
   "traits": {
     "title": "Architecture Characteristics",

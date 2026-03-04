@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import ChatMessage from "./ChatMessage";
@@ -13,7 +14,11 @@ export default function ChatWidget() {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, sendMessage, status } = useChat();
+  const transport = useMemo(
+    () => new DefaultChatTransport({ api: "/api/chat" }),
+    [],
+  );
+  const { messages, sendMessage, status } = useChat({ transport });
 
   const isLoading = status === "submitted" || status === "streaming";
 

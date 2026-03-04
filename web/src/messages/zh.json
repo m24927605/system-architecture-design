@@ -55,10 +55,11 @@
   },
   "tech": {
     "title": "技術選型",
-    "subtitle": "每個選擇都有取捨 — 以下是我們的決策理由",
-    "chosen": "選擇",
-    "alternatives": "替代方案",
-    "rationale": "決策理由"
+    "subtitle": "技術選型隨階段演進 — 以下是每階段的選擇與理由",
+    "phase1": "Phase 1: MVP",
+    "phase2": "Phase 2: Growth",
+    "phase3": "Phase 3: Scale",
+    "alternatives": "替代方案"
   },
   "traits": {
     "title": "架構特性",

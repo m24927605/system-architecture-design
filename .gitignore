@@ -7,3 +7,5 @@ vendor/
 *.pdf
 .claude/
 notes-zh/
+.vercel
+.env*.local
