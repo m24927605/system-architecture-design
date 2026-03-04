@@ -64,13 +64,14 @@
   },
   "traits": {
     "title": "Architecture Characteristics",
-    "subtitle": "Six dimensions of system quality",
+    "subtitle": "Seven dimensions of system quality",
     "scalability": "Scalability",
     "faultTolerance": "Fault Tolerance",
     "consistency": "Data Consistency",
     "latency": "Latency & Performance",
     "security": "Security",
-    "observability": "Observability"
+    "observability": "Observability",
+    "geoResilience": "Geographic Resilience"
   },
   "observability": {
     "title": "Observability",

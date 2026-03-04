@@ -461,6 +461,7 @@ func main() {
 | **Deployment** | ECS rolling update | EKS rolling update | Argo Rollouts canary (10→30→100%) |
 | **Observability** | CloudWatch | Prometheus + Grafana | Prometheus + Grafana + Loki + OTel + Tempo + PagerDuty |
 | **Fault Tolerance** | S3 + SQS durable; single-AZ DB risk | Multi-AZ DB/cache; SQS retry + DLQ | Full Multi-AZ; circuit breaker; automatic failover everywhere |
+| **Geographic Resilience** | Single-AZ; accept risk (RTO: hours) | Multi-AZ within single region (RTO: < 1 min) | Multi-Region Active-Passive / Pilot Light (RTO: 15-30 min, RPO: < 5 min) |
 | **Ops Complexity** | Minimal (all managed) | Moderate (K8s + GPU management) | High (multi-GPU, KEDA, canary, full observability) |
 | **Time to Deploy** | 1-2 days | 1-2 weeks | 2-4 weeks |
 
@@ -895,6 +896,80 @@ graph TB
 
 **Task-level tracing:** Every task is assigned a `trace_id` at creation time. This trace_id propagates through SQS message attributes, worker logs, and model server calls. In Grafana, operators can search by task_id to see the complete processing timeline: API request → queue wait time → STT inference → LLM inference → DB write, with latency breakdowns at each step.
 
+### 5.7 Multi-Region & Disaster Recovery
+
+Geographic resilience evolves alongside the platform through three phases:
+
+#### Phase Evolution
+
+| Phase | Topology | RTO | RPO | Key Mechanism |
+|-------|----------|-----|-----|---------------|
+| **Phase 1: MVP** | Single-AZ | Hours | Daily (S3 backup) | Accept risk; S3 durability covers objects |
+| **Phase 2: Growth** | Multi-AZ (single region) | < 1 min | 0 (synchronous replication) | RDS Multi-AZ, ElastiCache Multi-AZ, EKS across AZs |
+| **Phase 3: Scale** | Multi-Region Active-Passive | 15-30 min | < 5 min | Pilot Light DR in secondary region |
+
+#### Phase 3 Multi-Region Architecture
+
+- **Primary region:** `us-east-1` — runs the full production stack (EKS, RDS Multi-AZ, ElastiCache, SQS, S3).
+- **DR region:** `us-west-2` — **Pilot Light** configuration:
+  - RDS cross-region read replica (async replication, lag < 5 min)
+  - S3 Cross-Region Replication (CRR) for audio files and model artifacts
+  - ECR replication for container images
+  - Minimal warm compute: 1 EKS node (API only, no GPU) on standby
+  - SQS queues pre-created but idle
+
+```mermaid
+graph TB
+    subgraph Route53["Route 53 (Failover Routing)"]
+        DNS["api.example.com<br/>Health-check failover policy"]
+    end
+
+    subgraph Primary["us-east-1 (Primary — Active)"]
+        ALB1["ALB"]
+        EKS1["EKS Cluster<br/>(API + Workers + GPU)"]
+        RDS1["RDS Primary<br/>(Multi-AZ)"]
+        S3_1["S3 Bucket"]
+        SQS1["SQS Queues"]
+        Redis1["ElastiCache<br/>(Multi-AZ)"]
+    end
+
+    subgraph DR["us-west-2 (DR — Pilot Light)"]
+        ALB2["ALB (standby)"]
+        EKS2["EKS Cluster<br/>(1 node, API only)"]
+        RDS2["RDS Read Replica"]
+        S3_2["S3 Bucket (CRR)"]
+        SQS2["SQS Queues (idle)"]
+    end
+
+    DNS -->|"Active"| ALB1
+    DNS -.->|"Failover"| ALB2
+    ALB1 --> EKS1
+    EKS1 --> RDS1
+    EKS1 --> SQS1
+    EKS1 --> S3_1
+    EKS1 --> Redis1
+    ALB2 --> EKS2
+    EKS2 --> RDS2
+    RDS1 -->|"Async replication"| RDS2
+    S3_1 -->|"Cross-Region Replication"| S3_2
+```
+
+#### Failover SOP
+
+1. **Detection:** Route 53 health check fails on `us-east-1` ALB (3 consecutive failures, ~30 s).
+2. **DNS failover:** Route 53 automatically routes traffic to `us-west-2` ALB.
+3. **Promote RDS replica:** Operator (or automation) promotes `us-west-2` read replica to standalone primary (~5-10 min).
+4. **Scale DR compute:** Cluster Autoscaler provisions additional EKS nodes + GPU nodes as workers start scheduling.
+5. **Re-create ElastiCache:** Spin up new Redis cluster in DR region (cache is warm-up, not data loss).
+6. **Verify:** Run smoke tests against DR endpoint.
+
+#### Failback SOP
+
+1. Restore `us-east-1` infrastructure and establish reverse replication from `us-west-2` RDS.
+2. Once replication lag is zero, promote `us-east-1` back to primary.
+3. Switch Route 53 records back; drain `us-west-2` traffic.
+4. Scale down `us-west-2` to Pilot Light baseline.
+
 ---
 
 ## 6. Deployment & Operations
@@ -1029,6 +1104,7 @@ gantt
 | 8 | **GitOps tool** | ArgoCD | Jenkins CD, FluxCD | Declarative, Git as single source of truth, easy rollback to any commit. Strong UI for visibility. |
 | 9 | **Database** | RDS PostgreSQL | Aurora, DynamoDB | ACID for task state consistency. PostgreSQL is well-understood and sufficient. Aurora's 3x cost not justified. DynamoDB lacks relational queries needed for task management. |
 | 10 | **Observability** | Prometheus + Grafana + Loki + Tempo | Datadog, New Relic | Open-source stack avoids per-host pricing that scales expensively with GPU nodes. Full control. Trade-off: higher ops burden. |
+| 11 | **DR strategy** | Multi-Region Active-Passive (Pilot Light) | Active-Active, Warm Standby, Backup-Restore only | Pilot Light balances cost and recovery speed. Full active-active doubles infrastructure cost and adds cross-region consistency complexity. Warm Standby is costlier than needed for an async-processing platform where 15-30 min RTO is acceptable. |
 
 ---
 

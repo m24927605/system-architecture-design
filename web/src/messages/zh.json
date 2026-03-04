@@ -64,13 +64,14 @@
   },
   "traits": {
     "title": "架構特性",
-    "subtitle": "系統品質的六個維度",
+    "subtitle": "系統品質的七個維度",
     "scalability": "擴展性",
     "faultTolerance": "容錯機制",
     "consistency": "資料一致性",
     "latency": "延遲與效能",
     "security": "安全性",
-    "observability": "可觀測性"
+    "observability": "可觀測性",
+    "geoResilience": "地理容災"
   },
   "observability": {
     "title": "可觀測性",

@@ -127,4 +127,24 @@ export const traits: Trait[] = [
       "GPU 使用率、佇列深度、快取命中率儀表板",
     ],
   },
+  {
+    key: "geoResilience",
+    score: 7,
+    summary:
+      "Multi-AZ baseline + Multi-Region Active-Passive DR with RTO < 30 min",
+    summaryZh:
+      "Multi-AZ 基線 + 跨區域 Active-Passive DR，RTO < 30 分鐘",
+    details: [
+      "3-phase evolution: Single-AZ → Multi-AZ → Multi-Region Active-Passive (Pilot Light)",
+      "Route 53 health-check failover routing between us-east-1 (primary) and us-west-2 (DR)",
+      "RDS cross-region read replica with < 5 min RPO; promoted to primary on failover",
+      "S3 Cross-Region Replication (CRR) + ECR replication for stateless DR readiness",
+    ],
+    detailsZh: [
+      "三階段演進：Single-AZ → Multi-AZ → Multi-Region Active-Passive（Pilot Light）",
+      "Route 53 健康檢查故障轉移路由：us-east-1（主）↔ us-west-2（DR）",
+      "RDS 跨區域唯讀副本，RPO < 5 分鐘；故障轉移時提升為主資料庫",
+      "S3 跨區域複寫（CRR）+ ECR 複寫，確保無狀態服務隨時可啟動",
+    ],
+  },
 ];
