@@ -19,6 +19,37 @@ export interface ObsPhaseData {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Phase 1: MVP — CloudWatch Only                                     */
+/* ------------------------------------------------------------------ */
+
+const obsPhase1: ObsPhaseData = {
+  nodes: [
+    { id: "api", label: "API Service\n(ECS Fargate)", type: "api", position: { x: 80, y: 140 } },
+    { id: "stt-worker", label: "STT Worker\n(Fargate)", type: "worker", position: { x: 280, y: 80 } },
+    { id: "llm-worker", label: "LLM Worker\n(Fargate)", type: "worker", position: { x: 280, y: 200 } },
+    { id: "cloudwatch", label: "CloudWatch\n(Metrics + Logs)", type: "monitoring", position: { x: 520, y: 140 } },
+    { id: "cw-alarms", label: "CloudWatch\nAlarms", type: "monitoring", position: { x: 520, y: 290 } },
+    { id: "sns", label: "SNS", type: "queue", position: { x: 700, y: 290 } },
+    { id: "health", label: "/health\nEndpoints", type: "external", position: { x: 80, y: 320 } },
+  ],
+  edges: [
+    { id: "e-api-cw", source: "api", target: "cloudwatch" },
+    { id: "e-stt-cw", source: "stt-worker", target: "cloudwatch" },
+    { id: "e-llm-cw", source: "llm-worker", target: "cloudwatch" },
+    { id: "e-cw-alarms", source: "cloudwatch", target: "cw-alarms" },
+    { id: "e-alarms-sns", source: "cw-alarms", target: "sns" },
+    { id: "e-api-health", source: "api", target: "health" },
+  ],
+  metrics: {
+    components: "CloudWatch Metrics\n+ CloudWatch Logs",
+    monthlyCost: "~$30–50",
+    pillars: "Metrics + Logs (basic)",
+    alerting: "CloudWatch Alarms → SNS",
+    ha: "Fully managed (AWS)",
+  },
+};
+
+/* ------------------------------------------------------------------ */
 /*  Phase 2: Growth — Prometheus + Grafana + Loki + PagerDuty          */
 /* ------------------------------------------------------------------ */
 
@@ -94,6 +125,7 @@ const obsPhase3: ObsPhaseData = {
 };
 
 export const obsPhases: Record<string, ObsPhaseData> = {
+  phase1: obsPhase1,
   phase2: obsPhase2,
   phase3: obsPhase3,
 };

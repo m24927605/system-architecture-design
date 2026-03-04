@@ -74,7 +74,8 @@
   },
   "observability": {
     "title": "Observability",
-    "subtitle": "Three pillars of observability — monitor every service from Growth to Scale",
+    "subtitle": "Three pillars of observability — monitor every service from MVP to Scale",
+    "phase1": "Phase 1: MVP",
     "phase2": "Phase 2: Growth",
     "phase3": "Phase 3: Scale",
     "components": "Components",

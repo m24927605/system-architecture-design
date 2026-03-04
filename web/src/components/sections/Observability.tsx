@@ -64,10 +64,11 @@ export default function Observability() {
 /*  Sub-block 1: ObsStackDiagram                                       */
 /* ------------------------------------------------------------------ */
 
-const OBS_PHASE_KEYS = ["phase2", "phase3"] as const;
+const OBS_PHASE_KEYS = ["phase1", "phase2", "phase3"] as const;
 type ObsPhaseKey = (typeof OBS_PHASE_KEYS)[number];
 
 const OBS_TAB_LABEL_KEYS: Record<ObsPhaseKey, string> = {
+  phase1: "phase1",
   phase2: "phase2",
   phase3: "phase3",
 };
@@ -80,7 +81,7 @@ function ObsStackDiagram({
 }: {
   t: ReturnType<typeof useTranslations<"observability">>;
 }) {
-  const [activePhase, setActivePhase] = useState<ObsPhaseKey>("phase2");
+  const [activePhase, setActivePhase] = useState<ObsPhaseKey>("phase1");
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
