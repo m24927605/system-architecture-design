@@ -7,6 +7,7 @@
     "cost": "成本分析",
     "tech": "技術選型",
     "traits": "架構特性",
+    "observability": "可觀測性",
     "deploy": "維運部署",
     "demo": "即時展示"
   },
