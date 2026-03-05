@@ -55,7 +55,7 @@ const EC2_PRICING_URL =
   "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.json";
 
 const TRANSCRIBE_PRICING_URL =
-  "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonTranscribe/current/index.json";
+  "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/transcribe/current/index.json";
 
 const TARGET_INSTANCE_TYPES = ["g5.xlarge", "g5.2xlarge", "g5.4xlarge"];
 

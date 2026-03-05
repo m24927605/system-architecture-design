@@ -1,31 +1,29 @@
 {
-  "lastUpdated": "2026-03-05T19:19:54.797Z",
+  "lastUpdated": "2026-03-05T20:16:11.213Z",
   "ec2": {
+    "g5.4xlarge": {
+      "region": "us-east-1",
+      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/",
+      "onDemandPerHour": 1.624,
+      "reserved1yrAllUpfrontPerHour": 0.9549,
+      "reserved1yrNoUpfrontPerHour": 1.2789
+    },
     "g5.xlarge": {
       "region": "us-east-1",
+      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/",
       "onDemandPerHour": 1.006,
-      "reserved1yrNoUpfrontPerHour": 0.636,
-      "reserved1yrAllUpfrontPerHour": 0.575,
-      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/"
+      "reserved1yrAllUpfrontPerHour": 0.5916,
+      "reserved1yrNoUpfrontPerHour": 0.63378
     },
     "g5.2xlarge": {
       "region": "us-east-1",
-      "onDemandPerHour": 1.515,
-      "reserved1yrNoUpfrontPerHour": 0.958,
-      "reserved1yrAllUpfrontPerHour": 0.867,
-      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/"
-    },
-    "g5.4xlarge": {
-      "region": "us-east-1",
-      "onDemandPerHour": 2.534,
-      "reserved1yrNoUpfrontPerHour": 1.602,
-      "reserved1yrAllUpfrontPerHour": 1.449,
-      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/"
+      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/",
+      "onDemandPerHour": 1.212
     }
   },
   "transcribe": {
     "standard": {
-      "perMinute": 0.024,
+      "perMinute": 0.006,
       "sourceUrl": "https://aws.amazon.com/transcribe/pricing/"
     }
   },
