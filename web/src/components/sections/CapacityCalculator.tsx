@@ -70,7 +70,7 @@ export default function CapacityCalculator() {
           />
           {isLive ? t("pricingLive") : t("pricingSnapshot")} &middot;{" "}
           {t("updatedAt")}{" "}
-          {new Date(lastUpdated).toLocaleDateString()}
+          {new Date(lastUpdated).toISOString().slice(0, 10)}
         </div>
       </div>
 
