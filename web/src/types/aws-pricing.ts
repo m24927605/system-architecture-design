@@ -1,8 +1,8 @@
 export interface Ec2Pricing {
   region: string;
   onDemandPerHour: number;
-  reserved1yrNoUpfrontPerHour: number;
-  reserved1yrAllUpfrontPerHour: number;
+  reserved1yrNoUpfrontPerHour?: number;
+  reserved1yrAllUpfrontPerHour?: number;
   sourceUrl: string;
 }
 
