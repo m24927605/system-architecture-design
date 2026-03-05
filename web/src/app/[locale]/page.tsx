@@ -1,7 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/sections/Hero";
 import ArchitectureEvolution from "@/components/sections/ArchitectureEvolution";
-import TaskFlow from "@/components/sections/TaskFlow";
 import CapacityCalculator from "@/components/sections/CapacityCalculator";
 import CostAnalysis from "@/components/sections/CostAnalysis";
 import TechSelection from "@/components/sections/TechSelection";
@@ -20,8 +19,6 @@ export default function Home() {
           <Hero />
 
           <ArchitectureEvolution />
-
-          <TaskFlow />
 
           <CapacityCalculator />
 

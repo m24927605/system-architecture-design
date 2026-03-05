@@ -140,7 +140,29 @@ export default function CapacityCalculator() {
           </button>
 
           {showAdvanced && (
-            <div className="space-y-4 pt-2 border-t border-border">
+            <div className="space-y-6 pt-4 border-t border-border">
+              <SliderControl
+                label={t("gpuUtilization")}
+                displayValue={`${Math.round(input.gpuTargetUtilization * 100)}%`}
+                min={0.3}
+                max={0.95}
+                step={0.05}
+                value={input.gpuTargetUtilization}
+                onChange={(v) => setInput({ gpuTargetUtilization: v })}
+                ticks={["30%", "50%", "70%", "95%"]}
+                hint={t("gpuUtilizationHint")}
+              />
+              <SliderControl
+                label={t("llmThroughput")}
+                displayValue={`${input.llmTasksPerGpuPerMin} tasks/min/GPU`}
+                min={5}
+                max={80}
+                step={5}
+                value={input.llmTasksPerGpuPerMin}
+                onChange={(v) => setInput({ llmTasksPerGpuPerMin: v })}
+                ticks={["5", "20", "40", "60", "80"]}
+                hint={t("llmThroughputHint")}
+              />
               <NumberInput
                 label={t("avgInputTokens")}
                 value={input.avgInputTokens}
@@ -246,6 +268,7 @@ function SliderControl({
   value,
   onChange,
   ticks,
+  hint,
 }: {
   label: string;
   displayValue: string;
@@ -255,6 +278,7 @@ function SliderControl({
   value: number;
   onChange: (v: number) => void;
   ticks: string[];
+  hint?: string;
 }) {
   return (
     <div>
@@ -278,6 +302,9 @@ function SliderControl({
           <span key={t}>{t}</span>
         ))}
       </div>
+      {hint && (
+        <p className="text-xs text-text-secondary/60 mt-1.5 leading-relaxed">{hint}</p>
+      )}
     </div>
   );
 }

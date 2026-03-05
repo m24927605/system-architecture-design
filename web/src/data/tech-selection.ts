@@ -79,9 +79,9 @@ export const techCategories: TechCategory[] = [
         phase: 2,
         chosen: "Self-hosted faster-whisper (1 GPU)",
         rationale:
-          "Cost crossover at ~30-50K tasks/month. 1 A10G GPU ($420/mo) handles ~432K tasks/month. 38-69% cheaper than Transcribe at scale.",
+          "Cost crossover at ~27K tasks/month (3-min audio). 1 A10G GPU On-Demand ($734/mo) handles ~100K tasks/month (RTF 0.10). ~73% cheaper than Transcribe at scale.",
         rationaleZh:
-          "成本交叉點 ~30-50K 任務/月。1 台 A10G GPU（$420/月）可處理 ~432K 任務/月。規模化後比 Transcribe 便宜 38-69%。",
+          "成本交叉點 ~27K 任務/月（3 分鐘音檔）。1 台 A10G GPU On-Demand（$734/月）可處理 ~100K 任務/月（RTF 0.10）。規模化後比 Transcribe 便宜 ~73%。",
       },
       {
         phase: 3,
@@ -115,9 +115,9 @@ export const techCategories: TechCategory[] = [
         phase: 1,
         chosen: "Amazon Bedrock (Claude/Titan)",
         rationale:
-          "Zero GPU infrastructure. Access to frontier models. ~$0.003/task. Ideal for POC validation.",
+          "Zero GPU infrastructure. Access to frontier models. ~$0.001/task with Haiku (1.5K in + 500 out tokens). Ideal for POC validation.",
         rationaleZh:
-          "零 GPU 基礎設施。可使用前沿模型。~$0.003/task。適合 POC 驗證。",
+          "零 GPU 基礎設施。可使用前沿模型。使用 Haiku 約 $0.001/task（1.5K 輸入 + 500 輸出 tokens）。適合 POC 驗證。",
       },
       {
         phase: 2,
@@ -179,9 +179,9 @@ export const techCategories: TechCategory[] = [
       {
         name: "Kafka",
         reason:
-          "Event streaming semantics — overkill for task queue. MSK $200+/mo minimum",
+          "Event streaming semantics — overkill for task queue. MSK ~$118+/mo minimum (3 × kafka.t3.small)",
         reasonZh:
-          "Event Stream 語意，Task Queue 用不到。MSK 最低 $200+/月",
+          "Event Stream 語意，Task Queue 用不到。MSK 最低 ~$118+/月（3 × kafka.t3.small）",
       },
       {
         name: "RabbitMQ",
@@ -201,17 +201,17 @@ export const techCategories: TechCategory[] = [
         phase: 1,
         chosen: "RDS PostgreSQL (Single-AZ)",
         rationale:
-          "ACID for task state. Single-AZ keeps cost low (~$15/mo). Acceptable downtime risk for POC.",
+          "ACID for task state. Single-AZ keeps cost low (~$12/mo for db.t4g.micro). Acceptable downtime risk for POC.",
         rationaleZh:
-          "ACID 確保任務狀態。Single-AZ 低成本（~$15/月）。POC 階段可接受停機風險。",
+          "ACID 確保任務狀態。Single-AZ 低成本（db.t4g.micro ~$12/月）。POC 階段可接受停機風險。",
       },
       {
         phase: 2,
         chosen: "RDS PostgreSQL (Multi-AZ)",
         rationale:
-          "Automatic failover for production reliability. < 60 seconds recovery. ~$70/mo.",
+          "Automatic failover for production reliability. < 60 seconds recovery. ~$95/mo (db.t4g.small Multi-AZ).",
         rationaleZh:
-          "自動 failover 確保生產可靠性。恢復時間 < 60 秒。~$70/月。",
+          "自動 failover 確保生產可靠性。恢復時間 < 60 秒。~$95/月（db.t4g.small Multi-AZ）。",
       },
       {
         phase: 3,
@@ -245,9 +245,9 @@ export const techCategories: TechCategory[] = [
         phase: 1,
         chosen: "ElastiCache Redis (Single Node)",
         rationale:
-          "Result caching, idempotency locks, rate limiting. Single node sufficient for POC (~$12/mo).",
+          "Result caching, idempotency locks, rate limiting. Single node sufficient for POC (~$12/mo for cache.t4g.micro).",
         rationaleZh:
-          "結果快取、冪等鎖、Rate Limiting。單節點足夠 POC（~$12/月）。",
+          "結果快取、冪等鎖、Rate Limiting。單節點足夠 POC（cache.t4g.micro ~$12/月）。",
       },
       {
         phase: 2,
@@ -386,9 +386,9 @@ export const techCategories: TechCategory[] = [
       {
         name: "Python",
         reason:
-          "GIL limits concurrency; ML ecosystem irrelevant since workers only make HTTP calls",
+          "GIL limits concurrency; Worker is an I/O orchestrator (SQS → HTTP → DB), not an inference runner — Python's ML library advantage doesn't apply",
         reasonZh:
-          "GIL 限制並行；ML 生態系不相關（Worker 只做 HTTP 呼叫）",
+          "GIL 限制並行；Worker 角色為 I/O 調度（SQS → HTTP → DB），不執行推理 — Python 的 ML 套件優勢在此層無用武之地",
       },
       {
         name: "Java",

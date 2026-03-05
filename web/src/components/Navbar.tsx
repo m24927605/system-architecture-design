@@ -8,7 +8,6 @@ import LanguageSwitch from "./LanguageSwitch";
 const NAV_ITEMS = [
   { key: "overview", href: "#hero" },
   { key: "architecture", href: "#architecture" },
-  { key: "taskFlow", href: "#task-flow" },
   { key: "capacity", href: "#capacity" },
   { key: "cost", href: "#cost" },
   { key: "tech", href: "#tech" },

@@ -18,13 +18,13 @@ export const traits: Trait[] = [
     details: [
       "KEDA scales workers based on SQS queue depth (proactive, not reactive)",
       "Cluster Autoscaler provisions GPU nodes when pods are unschedulable",
-      "Spot + On-Demand GPU mix for cost optimization (40-60% savings)",
+      "Spot + On-Demand GPU mix for cost optimization (g5.xlarge Spot ~60-70% off On-Demand)",
       "API pods scale via standard HPA on CPU utilization",
     ],
     detailsZh: [
       "KEDA 根據 SQS 佇列深度擴展 Worker（主動式，非反應式）",
       "Cluster Autoscaler 在 Pod 無法排程時擴展 GPU 節點",
-      "Spot + On-Demand GPU 混合以優化成本（省 40-60%）",
+      "Spot + On-Demand GPU 混合以優化成本（g5.xlarge Spot 約省 60-70%）",
       "API Pod 透過 HPA 根據 CPU 使用率擴展",
     ],
   },

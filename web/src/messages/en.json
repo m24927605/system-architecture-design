@@ -45,6 +45,10 @@
     "savings": "Savings",
     "whisperRtf": "Whisper RTF (Real-Time Factor)",
     "bedrockModel": "Bedrock Model",
+    "gpuUtilization": "GPU Target Utilization",
+    "gpuUtilizationHint": "Controls GPU over-provisioning ratio. Below ~100K tasks/mo only 1 GPU is needed — changing this has no cost impact.",
+    "llmThroughput": "LLM Throughput (vLLM batching)",
+    "llmThroughputHint": "Estimated vLLM continuous batching throughput. Depends on model size and prompt length. Below ~100K tasks/mo only 1 GPU is needed — changing this has no cost impact.",
     "avgInputTokens": "Avg Input Tokens",
     "avgOutputTokens": "Avg Output Tokens",
     "sttThroughput": "STT Throughput",
@@ -61,7 +65,7 @@
     "selfHostedTotal": "Self-Hosted Total",
     "managedTotal": "Managed Total",
     "assumptions": "Assumptions",
-    "assumptionsText": "GPU: g5.xlarge On-Demand (730h/mo) | Utilization target: 70% | Whisper large-v3 | ~400 tokens/min transcription | Base infra: ALB, RDS, ElastiCache, S3, CloudWatch"
+    "assumptionsText": "Region: us-east-1 (N. Virginia) | GPU: g5.xlarge On-Demand $1.006/hr (730h/mo = $734) | Utilization: 70% | Whisper large-v3 | ~400 tokens/min transcription | Self-hosted base: EKS $73 + RDS Multi-AZ $95 + ElastiCache $24 + ALB $21 + CW $10 = $223/mo | Managed base: RDS $12 + ElastiCache $12 + CW $10 = $34/mo"
   },
   "cost": {
     "title": "Cost Crossover Analysis",

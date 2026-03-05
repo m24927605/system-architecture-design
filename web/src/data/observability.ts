@@ -42,7 +42,7 @@ const obsPhase1: ObsPhaseData = {
   ],
   metrics: {
     components: "CloudWatch Metrics\n+ CloudWatch Logs",
-    monthlyCost: "~$30–50",
+    monthlyCost: "~$10–30",
     pillars: "Metrics + Logs (basic)",
     alerting: "CloudWatch Alarms → SNS",
     ha: "Fully managed (AWS)",
@@ -77,7 +77,7 @@ const obsPhase2: ObsPhaseData = {
   ],
   metrics: {
     components: "Prometheus + Grafana + Loki",
-    monthlyCost: "~$183",
+    monthlyCost: "~$0 extra",
     pillars: "Metrics + Logs",
     alerting: "P0/P1/P2 → PagerDuty + Slack",
     ha: "Single instance",
@@ -117,7 +117,7 @@ const obsPhase3: ObsPhaseData = {
   ],
   metrics: {
     components: "Prometheus + Grafana + Loki\n+ Tempo + OTel Collector",
-    monthlyCost: "~$502",
+    monthlyCost: "~$0 extra",
     pillars: "Metrics + Logs + Traces",
     alerting: "P0/P1/P2 → PagerDuty + Slack",
     ha: "All HA (2+ replicas)",

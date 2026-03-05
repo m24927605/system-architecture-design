@@ -45,6 +45,10 @@
     "savings": "節省",
     "whisperRtf": "Whisper RTF (即時因子)",
     "bedrockModel": "Bedrock 模型",
+    "gpuUtilization": "GPU 目標利用率",
+    "gpuUtilizationHint": "影響多 GPU 時的超配比例。低於 ~100K tasks/月時僅需 1 GPU，調整此值不影響成本。",
+    "llmThroughput": "LLM 吞吐量 (vLLM batching)",
+    "llmThroughputHint": "vLLM 連續批次處理的估計吞吐量，實際值取決於模型大小與 prompt 長度。低於 ~100K tasks/月時僅需 1 GPU，調整此值不影響成本。",
     "avgInputTokens": "平均輸入 Tokens",
     "avgOutputTokens": "平均輸出 Tokens",
     "sttThroughput": "STT 吞吐量",
@@ -61,7 +65,7 @@
     "selfHostedTotal": "自建總成本",
     "managedTotal": "託管總成本",
     "assumptions": "假設條件",
-    "assumptionsText": "GPU: g5.xlarge On-Demand (730h/月) | 利用率目標: 70% | Whisper large-v3 | ~400 tokens/分鐘轉錄 | 基礎建設: ALB, RDS, ElastiCache, S3, CloudWatch"
+    "assumptionsText": "Region：us-east-1 (N. Virginia) | GPU: g5.xlarge On-Demand $1.006/hr（730h/月 = $734）| 利用率：70% | Whisper large-v3 | ~400 tokens/分鐘轉錄 | 自建基礎：EKS $73 + RDS Multi-AZ $95 + ElastiCache $24 + ALB $21 + CW $10 = $223/月 | 託管基礎：RDS $12 + ElastiCache $12 + CW $10 = $34/月"
   },
   "cost": {
     "title": "成本交叉分析",

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { phases, getDynamicMetrics } from "@/data/architecture-nodes";
 import type { ArchNode } from "@/data/architecture-nodes";
+import { phaseFlows } from "@/data/task-flow-steps";
 import { useCapacity } from "@/contexts/CapacityContext";
 import ArchitectureNode from "@/components/architecture/ArchitectureNode";
 import ArchitectureEdge from "@/components/architecture/ArchitectureEdge";
@@ -58,6 +59,12 @@ export default function ArchitectureEvolution() {
     return m;
   }, [data.nodes]);
 
+  /* Get current phase's flow steps */
+  const currentFlowSteps = useMemo(() => {
+    const pf = phaseFlows.find((p) => p.key === activePhase);
+    return pf?.steps ?? [];
+  }, [activePhase]);
+
   const handleTab = useCallback((key: PhaseKey) => {
     setActivePhase(key);
   }, []);
@@ -101,7 +108,7 @@ export default function ArchitectureEvolution() {
         {/* Diagram */}
         <div
           ref={containerRef}
-          className="flex-1 rounded-2xl border border-border bg-bg-card/40 overflow-hidden"
+          className="flex-1 rounded-2xl border border-border bg-bg-card/40 overflow-visible"
           style={{ minHeight: BASE_H * scale + 20 }}
         >
           <div
@@ -137,17 +144,26 @@ export default function ArchitectureEvolution() {
 
             {/* Node layer */}
             <AnimatePresence mode="popLayout">
-              {data.nodes.map((node) => (
-                <ArchitectureNode
-                  key={`${activePhase}-${node.id}`}
-                  id={node.id}
-                  label={node.label}
-                  type={node.type}
-                  x={node.position.x}
-                  y={node.position.y}
-                  scale={scale}
-                />
-              ))}
+              {data.nodes.map((node) => {
+                const nodeFlowSteps = node.steps
+                  ? currentFlowSteps.filter((s) => node.steps!.includes(s.id))
+                  : undefined;
+
+                return (
+                  <ArchitectureNode
+                    key={`${activePhase}-${node.id}`}
+                    id={node.id}
+                    label={node.label}
+                    type={node.type}
+                    x={node.position.x}
+                    y={node.position.y}
+                    scale={scale}
+                    steps={node.steps}
+                    flowSteps={nodeFlowSteps}
+                    canvasWidth={BASE_W * scale}
+                  />
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>

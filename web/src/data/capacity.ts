@@ -8,6 +8,7 @@ export interface CapacityInput {
   avgInputTokens: number;
   avgOutputTokens: number;
   gpuTargetUtilization: number;
+  llmTasksPerGpuPerMin: number;
 }
 
 export interface CapacityResult {
@@ -27,10 +28,10 @@ export interface CapacityResult {
 }
 
 const HOURS_PER_MONTH = 730;
-const BASE_INFRA_COST = 500;
-const BASE_MANAGED_INFRA = 100;
-const LLM_TASKS_PER_GPU_PER_MIN = 40;
-
+// EKS $73 + RDS Multi-AZ $95 + ElastiCache Multi-AZ $24 + ALB $21 + CloudWatch $10
+const BASE_INFRA_COST = 223;
+// RDS Single-AZ $12 + ElastiCache $12 + CloudWatch $10
+const BASE_MANAGED_INFRA = 34;
 export const DEFAULT_INPUT: CapacityInput = {
   monthlyTasks: 10000,
   avgAudioMinutes: 3,
@@ -39,6 +40,7 @@ export const DEFAULT_INPUT: CapacityInput = {
   avgInputTokens: 1500,
   avgOutputTokens: 500,
   gpuTargetUtilization: 0.7,
+  llmTasksPerGpuPerMin: 40,
 };
 
 export function calculateCapacity(
@@ -47,7 +49,7 @@ export function calculateCapacity(
 ): CapacityResult {
   const {
     monthlyTasks, avgAudioMinutes, whisperRtf, bedrockModelKey,
-    avgInputTokens, avgOutputTokens, gpuTargetUtilization,
+    avgInputTokens, avgOutputTokens, gpuTargetUtilization, llmTasksPerGpuPerMin,
   } = input;
 
   const tasksPerMin = monthlyTasks / (30 * 24 * 60);
@@ -58,7 +60,7 @@ export function calculateCapacity(
   const sttGpus = Math.max(1, Math.ceil(tasksPerMin / (sttTasksPerMinPerGpu * gpuTargetUtilization)));
 
   // LLM GPUs
-  const llmGpus = Math.max(1, Math.ceil(tasksPerMin / (LLM_TASKS_PER_GPU_PER_MIN * gpuTargetUtilization)));
+  const llmGpus = Math.max(1, Math.ceil(tasksPerMin / (llmTasksPerGpuPerMin * gpuTargetUtilization)));
 
   // GPU cost (On-Demand from pricing)
   const ec2 = pricing.ec2["g5.xlarge"];

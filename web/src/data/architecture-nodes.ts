@@ -16,6 +16,8 @@ export interface ArchNode {
   label: string;
   type: NodeType;
   position: { x: number; y: number };
+  /** Task-flow step numbers this node participates in */
+  steps?: number[];
 }
 
 export interface ArchEdge {
@@ -43,65 +45,74 @@ export interface PhaseData {
 /* ------------------------------------------------------------------ */
 const phase1: PhaseData = {
   nodes: [
-    { id: "user", label: "User", type: "user", position: { x: 40, y: 220 } },
+    { id: "user", label: "User", type: "user", position: { x: 40, y: 220 }, steps: [1, 2, 8] },
     {
       id: "api",
       label: "API Service\n(ECS Fargate, Go+Echo)",
       type: "api",
       position: { x: 200, y: 220 },
+      steps: [1, 3, 4],
     },
     {
       id: "s3",
       label: "S3",
       type: "db",
       position: { x: 380, y: 80 },
+      steps: [2],
     },
     {
       id: "sqs",
       label: "SQS\n(Single Queue)",
       type: "queue",
       position: { x: 380, y: 220 },
+      steps: [4],
     },
     {
       id: "stt-worker",
       label: "STT Worker\n(Fargate)",
       type: "worker",
       position: { x: 560, y: 140 },
+      steps: [5],
     },
     {
       id: "llm-worker",
       label: "LLM Worker\n(Fargate)",
       type: "worker",
       position: { x: 560, y: 300 },
+      steps: [6],
     },
     {
       id: "aws-transcribe",
       label: "AWS Transcribe",
       type: "external",
       position: { x: 740, y: 140 },
+      steps: [5],
     },
     {
       id: "bedrock",
       label: "Amazon Bedrock",
       type: "external",
       position: { x: 740, y: 300 },
+      steps: [6],
     },
     {
       id: "rds",
       label: "RDS PostgreSQL\n(Single-AZ)",
       type: "db",
       position: { x: 200, y: 400 },
+      steps: [3, 7],
     },
     {
       id: "redis",
       label: "ElastiCache Redis\n(Single)",
       type: "cache",
       position: { x: 380, y: 400 },
+      steps: [8],
     },
   ],
   edges: [
     { id: "e-user-api", source: "user", target: "api" },
-    { id: "e-api-s3", source: "api", target: "s3" },
+    { id: "e-user-s3", source: "user", target: "s3" },
     { id: "e-api-sqs", source: "api", target: "sqs" },
     { id: "e-sqs-stt", source: "sqs", target: "stt-worker" },
     { id: "e-sqs-llm", source: "sqs", target: "llm-worker" },
@@ -124,78 +135,90 @@ const phase1: PhaseData = {
 /* ------------------------------------------------------------------ */
 const phase2: PhaseData = {
   nodes: [
-    { id: "user", label: "User", type: "user", position: { x: 20, y: 210 } },
+    { id: "user", label: "User", type: "user", position: { x: 20, y: 210 }, steps: [1, 2, 9] },
     {
       id: "alb",
       label: "ALB",
       type: "lb",
       position: { x: 130, y: 210 },
+      steps: [1, 9],
     },
     {
       id: "api",
       label: "API Service\n(EKS)",
       type: "api",
       position: { x: 260, y: 210 },
+      steps: [1, 3, 4],
     },
     {
       id: "stt-queue",
       label: "STT Queue\n(SQS)",
       type: "queue",
       position: { x: 410, y: 110 },
+      steps: [4],
     },
     {
       id: "llm-queue",
       label: "LLM Queue\n(SQS)",
       type: "queue",
       position: { x: 410, y: 310 },
+      steps: [6],
     },
     {
       id: "dlq",
       label: "DLQ",
       type: "queue",
       position: { x: 410, y: 430 },
+      steps: [8],
     },
     {
       id: "stt-worker",
       label: "STT Worker",
       type: "worker",
       position: { x: 560, y: 110 },
+      steps: [5, 6],
     },
     {
       id: "llm-worker",
       label: "LLM Worker",
       type: "worker",
       position: { x: 560, y: 310 },
+      steps: [7, 8],
     },
     {
       id: "whisper",
       label: "Whisper Server\n(GPU)",
       type: "gpu",
       position: { x: 720, y: 110 },
+      steps: [5],
     },
     {
       id: "vllm",
       label: "vLLM Server\n(GPU)",
       type: "gpu",
       position: { x: 720, y: 310 },
+      steps: [7],
     },
     {
       id: "s3",
       label: "S3",
       type: "db",
       position: { x: 260, y: 60 },
+      steps: [2],
     },
     {
       id: "rds",
       label: "RDS PostgreSQL\n(Multi-AZ)",
       type: "db",
       position: { x: 130, y: 400 },
+      steps: [3, 6, 8],
     },
     {
       id: "redis",
       label: "ElastiCache\n(Multi-AZ)",
       type: "cache",
       position: { x: 260, y: 400 },
+      steps: [9],
     },
     {
       id: "monitoring",
@@ -206,8 +229,8 @@ const phase2: PhaseData = {
   ],
   edges: [
     { id: "e-user-alb", source: "user", target: "alb" },
+    { id: "e-user-s3", source: "user", target: "s3" },
     { id: "e-alb-api", source: "alb", target: "api" },
-    { id: "e-api-s3", source: "api", target: "s3" },
     { id: "e-api-stt-q", source: "api", target: "stt-queue" },
     { id: "e-api-llm-q", source: "api", target: "llm-queue" },
     { id: "e-stt-q-worker", source: "stt-queue", target: "stt-worker" },
@@ -235,84 +258,97 @@ const phase2: PhaseData = {
 /* ------------------------------------------------------------------ */
 const phase3: PhaseData = {
   nodes: [
-    { id: "user", label: "User", type: "user", position: { x: 10, y: 220 } },
+    { id: "user", label: "User", type: "user", position: { x: 10, y: 220 }, steps: [1, 2, 9] },
     {
       id: "cloudfront",
       label: "CloudFront",
       type: "cdn",
       position: { x: 100, y: 220 },
+      steps: [1, 9],
     },
     {
       id: "alb",
       label: "ALB",
       type: "lb",
       position: { x: 200, y: 220 },
+      steps: [1, 9],
     },
     {
       id: "api",
       label: "API Service\n(HPA)",
       type: "api",
       position: { x: 310, y: 220 },
+      steps: [1, 3, 4],
     },
     {
       id: "stt-queue",
       label: "STT Queue",
       type: "queue",
       position: { x: 440, y: 100 },
+      steps: [4],
     },
     {
       id: "llm-queue",
       label: "LLM Queue",
       type: "queue",
       position: { x: 440, y: 340 },
+      steps: [6],
     },
     {
       id: "dlq",
       label: "DLQ",
       type: "queue",
       position: { x: 440, y: 450 },
+      steps: [8],
     },
     {
       id: "stt-workers",
       label: "STT Workers\n(KEDA)",
       type: "worker",
       position: { x: 580, y: 60 },
+      steps: [5, 6],
     },
     {
       id: "llm-workers",
       label: "LLM Workers\n(KEDA)",
       type: "worker",
       position: { x: 580, y: 300 },
+      steps: [7, 8],
     },
     {
       id: "whisper-pool",
       label: "Whisper\nGPU Pool",
       type: "gpu",
       position: { x: 730, y: 60 },
+      steps: [5],
     },
     {
       id: "vllm-pool",
       label: "vLLM\nGPU Pool",
       type: "gpu",
       position: { x: 730, y: 300 },
+      steps: [7],
     },
     {
       id: "s3",
       label: "S3",
       type: "db",
       position: { x: 310, y: 60 },
+      steps: [2],
     },
     {
       id: "rds",
       label: "RDS Multi-AZ\n+ Read Replica",
       type: "db",
       position: { x: 100, y: 410 },
+      steps: [3, 6, 8],
     },
     {
       id: "redis",
       label: "ElastiCache\nCluster",
       type: "cache",
       position: { x: 230, y: 410 },
+      steps: [9],
     },
     {
       id: "argo",
@@ -329,9 +365,9 @@ const phase3: PhaseData = {
   ],
   edges: [
     { id: "e-user-cf", source: "user", target: "cloudfront" },
+    { id: "e-user-s3", source: "user", target: "s3" },
     { id: "e-cf-alb", source: "cloudfront", target: "alb" },
     { id: "e-alb-api", source: "alb", target: "api" },
-    { id: "e-api-s3", source: "api", target: "s3" },
     { id: "e-api-stt-q", source: "api", target: "stt-queue" },
     { id: "e-api-llm-q", source: "api", target: "llm-queue" },
     { id: "e-stt-q-workers", source: "stt-queue", target: "stt-workers" },
