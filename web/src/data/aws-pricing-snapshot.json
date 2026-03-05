@@ -1,0 +1,62 @@
+{
+  "lastUpdated": "2026-03-05T00:00:00Z",
+  "ec2": {
+    "g5.xlarge": {
+      "region": "us-east-1",
+      "onDemandPerHour": 1.006,
+      "reserved1yrNoUpfrontPerHour": 0.636,
+      "reserved1yrAllUpfrontPerHour": 0.575,
+      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/"
+    },
+    "g5.2xlarge": {
+      "region": "us-east-1",
+      "onDemandPerHour": 1.515,
+      "reserved1yrNoUpfrontPerHour": 0.958,
+      "reserved1yrAllUpfrontPerHour": 0.867,
+      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/"
+    },
+    "g5.4xlarge": {
+      "region": "us-east-1",
+      "onDemandPerHour": 2.534,
+      "reserved1yrNoUpfrontPerHour": 1.602,
+      "reserved1yrAllUpfrontPerHour": 1.449,
+      "sourceUrl": "https://aws.amazon.com/ec2/pricing/on-demand/"
+    }
+  },
+  "transcribe": {
+    "standard": {
+      "perMinute": 0.024,
+      "sourceUrl": "https://aws.amazon.com/transcribe/pricing/"
+    }
+  },
+  "bedrock": {
+    "claude-3-haiku": {
+      "displayName": "Claude 3 Haiku",
+      "inputPer1kTokens": 0.00025,
+      "outputPer1kTokens": 0.00125,
+      "sourceUrl": "https://aws.amazon.com/bedrock/pricing/",
+      "manualEntry": true
+    },
+    "claude-3.5-sonnet": {
+      "displayName": "Claude 3.5 Sonnet",
+      "inputPer1kTokens": 0.003,
+      "outputPer1kTokens": 0.015,
+      "sourceUrl": "https://aws.amazon.com/bedrock/pricing/",
+      "manualEntry": true
+    },
+    "llama3-8b": {
+      "displayName": "Llama 3 8B",
+      "inputPer1kTokens": 0.0003,
+      "outputPer1kTokens": 0.0006,
+      "sourceUrl": "https://aws.amazon.com/bedrock/pricing/",
+      "manualEntry": true
+    },
+    "mistral-large": {
+      "displayName": "Mistral Large",
+      "inputPer1kTokens": 0.004,
+      "outputPer1kTokens": 0.012,
+      "sourceUrl": "https://aws.amazon.com/bedrock/pricing/",
+      "manualEntry": true
+    }
+  }
+}
