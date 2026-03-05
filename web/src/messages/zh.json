@@ -108,9 +108,9 @@
     "components": "元件",
     "monthlyCost": "月成本",
     "pillars": "支柱",
-    "alerting": "告警",
+    "alerting": "警報",
     "ha": "高可用性",
-    "alertTiers": "告警分級",
+    "alertTiers": "警報分級",
     "dashboardPreview": "儀表板預覽",
     "metricsCoverage": "指標覆蓋",
     "rules": "條規則",
@@ -125,10 +125,10 @@
     "metric": "指標",
     "type": "類型",
     "description": "說明",
-    "alert": "告警",
+    "alert": "警報",
     "condition": "條件",
     "duration": "持續時間",
-    "activeAlerts": "告警狀態：無"
+    "activeAlerts": "警報狀態：無"
   },
   "deploy": {
     "title": "維運與部署",

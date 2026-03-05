@@ -103,7 +103,7 @@ export const traits: Trait[] = [
         detailsZh: [
           "SQS visibility timeout 在 Worker 掛掉時自動重新投遞（5 分鐘）",
           "Redis SETNX 冪等鎖防止重複處理",
-          "DLQ 搭配 CloudWatch 告警監控失敗任務",
+          "DLQ 搭配 CloudWatch 警報監控失敗任務",
           "Multi-AZ RDS 和 ElastiCache 提供資料庫層容錯",
         ],
       },
@@ -300,7 +300,7 @@ export const traits: Trait[] = [
       phase1: {
         score: 3,
         summary: "CloudWatch metrics + basic alarms, no distributed tracing",
-        summaryZh: "CloudWatch 指標 + 基本告警，無分散式追蹤",
+        summaryZh: "CloudWatch 指標 + 基本警報，無分散式追蹤",
         details: [
           "CloudWatch Logs for application logging",
           "CloudWatch Metrics for basic service health (CPU, memory, error rate)",
@@ -310,7 +310,7 @@ export const traits: Trait[] = [
         detailsZh: [
           "CloudWatch Logs 用於應用程式日誌",
           "CloudWatch Metrics 監控基本服務健康（CPU、記憶體、錯誤率）",
-          "CloudWatch Alarms 設定關鍵閾值告警（DLQ > 0、錯誤率 > 5%）",
+          "CloudWatch Alarms 設定關鍵閾值警報（DLQ > 0、錯誤率 > 5%）",
           "無分散式追蹤 — MVP 規模下可接受",
         ],
       },
@@ -344,7 +344,7 @@ export const traits: Trait[] = [
         detailsZh: [
           "trace_id 透過 SQS -> Worker -> Model Server 傳播",
           "每任務時間軸：API -> 排隊等待 -> STT -> LLM -> DB 寫入",
-          "告警：DLQ > 0、錯誤率 > 5%、P99 超標 -> PagerDuty",
+          "警報：DLQ > 0、錯誤率 > 5%、P99 超標 -> PagerDuty",
           "GPU 使用率、佇列深度、快取命中率儀表板",
         ],
       },

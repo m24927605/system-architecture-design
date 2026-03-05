@@ -227,15 +227,15 @@ const obsPhase2Steps: FlowStep[] = [
     id: 7, actor: "Grafana", action: "P0/P1 alert", target: "PagerDuty",
     detail: "Alert rules evaluate every 1 min; P0 (Critical) and P1 (Warning) route to PagerDuty on-call",
     actorType: "monitoring", targetType: "external",
-    actorZh: "Grafana", actionZh: "P0/P1 告警", targetZh: "PagerDuty",
-    detailZh: "告警規則每分鐘評估；P0（嚴重）和 P1（警告）路由到 PagerDuty 值班",
+    actorZh: "Grafana", actionZh: "P0/P1 警報", targetZh: "PagerDuty",
+    detailZh: "警報規則每分鐘評估；P0（嚴重）和 P1（警告）路由到 PagerDuty 值班",
   },
   {
     id: 8, actor: "Grafana", action: "P2 notification", target: "Slack",
     detail: "P2 (Info) alerts sent to Slack #ops-info channel for awareness, no paging",
     actorType: "monitoring", targetType: "external",
     actorZh: "Grafana", actionZh: "P2 通知", targetZh: "Slack",
-    detailZh: "P2（資訊）告警發送至 Slack #ops-info 頻道供知悉，不觸發呼叫",
+    detailZh: "P2（資訊）警報發送至 Slack #ops-info 頻道供知悉，不觸發呼叫",
   },
 ];
 
@@ -307,15 +307,15 @@ const obsPhase3Steps: FlowStep[] = [
     id: 10, actor: "Grafana", action: "P0/P1 alert", target: "PagerDuty",
     detail: "Multi-signal alerts: combine metric threshold + log pattern + trace error rate for high-confidence alerting",
     actorType: "monitoring", targetType: "external",
-    actorZh: "Grafana", actionZh: "P0/P1 告警", targetZh: "PagerDuty",
-    detailZh: "多信號告警：結合指標閾值 + 日誌模式 + 追蹤錯誤率實現高信心度告警",
+    actorZh: "Grafana", actionZh: "P0/P1 警報", targetZh: "PagerDuty",
+    detailZh: "多信號警報：結合指標閾值 + 日誌模式 + 追蹤錯誤率實現高信心度警報",
   },
   {
     id: 11, actor: "Grafana", action: "P2 notification", target: "Slack",
     detail: "P2 (Info) alerts to Slack #ops-info; includes Grafana dashboard link for quick context",
     actorType: "monitoring", targetType: "external",
     actorZh: "Grafana", actionZh: "P2 通知", targetZh: "Slack",
-    detailZh: "P2（資訊）告警至 Slack #ops-info；附帶 Grafana 儀表板連結快速了解上下文",
+    detailZh: "P2（資訊）警報至 Slack #ops-info；附帶 Grafana 儀表板連結快速了解上下文",
   },
 ];
 

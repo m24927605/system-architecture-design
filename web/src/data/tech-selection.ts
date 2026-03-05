@@ -300,7 +300,7 @@ export const techCategories: TechCategory[] = [
         rationale:
           "Full three pillars: Metrics + Logs + Traces. trace_id propagates through entire pipeline. Alerting → PagerDuty/Slack.",
         rationaleZh:
-          "完整三大支柱：Metrics + Logs + Traces。trace_id 貫穿整個管線。告警 → PagerDuty/Slack。",
+          "完整三大支柱：Metrics + Logs + Traces。trace_id 貫穿整個管線。警報 → PagerDuty/Slack。",
       },
     ],
     alternatives: [

@@ -221,26 +221,65 @@ function CICDPipeline() {
 
 interface CanaryPhase {
   label: string;
+  labelZh: string;
   canaryPct: number;
+  wait: string;
+  waitZh: string;
+  criteria: string[];
+  criteriaZh: string[];
 }
 
 const canaryPhases: CanaryPhase[] = [
-  { label: "Phase 1", canaryPct: 10 },
-  { label: "Phase 2", canaryPct: 30 },
-  { label: "Phase 3", canaryPct: 100 },
+  {
+    label: "Phase 1 — Smoke Test",
+    labelZh: "Phase 1 — 煙霧測試",
+    canaryPct: 10,
+    wait: "Observe 10 min",
+    waitZh: "觀察 10 分鐘",
+    criteria: ["Error rate < 1%", "P99 latency < 3s", "No DLQ messages"],
+    criteriaZh: ["錯誤率 < 1%", "P99 延遲 < 3s", "DLQ 訊息為 0"],
+  },
+  {
+    label: "Phase 2 — Expanded Traffic",
+    labelZh: "Phase 2 — 擴大流量",
+    canaryPct: 30,
+    wait: "Observe 15 min",
+    waitZh: "觀察 15 分鐘",
+    criteria: ["Error rate < 0.5%", "P99 latency < 2s", "GPU utilization stable"],
+    criteriaZh: ["錯誤率 < 0.5%", "P99 延遲 < 2s", "GPU 使用率穩定"],
+  },
+  {
+    label: "Phase 3 — Full Rollout",
+    labelZh: "Phase 3 — 全量上線",
+    canaryPct: 100,
+    wait: "Complete",
+    waitZh: "完成",
+    criteria: ["All metrics green", "Old ReplicaSet scaled to 0"],
+    criteriaZh: ["所有指標正常", "舊版 ReplicaSet 縮減至 0"],
+  },
+];
+
+const ROLLBACK_TRIGGERS = [
+  { label: "Error rate > 5% for 2 min", labelZh: "錯誤率 > 5% 持續 2 分鐘" },
+  { label: "P99 latency > 5s for 3 min", labelZh: "P99 延遲 > 5s 持續 3 分鐘" },
+  { label: "DLQ messages > 0 for 1 min", labelZh: "DLQ 訊息 > 0 持續 1 分鐘" },
+  { label: "Pod CrashLoopBackOff detected", labelZh: "偵測到 Pod CrashLoopBackOff" },
 ];
 
 function CanaryDeployment() {
   const t = useTranslations("deploy");
+  const locale = useLocale();
+  const isZh = locale === "zh";
 
   return (
     <div>
       <h3 className="text-lg font-bold text-text-primary mb-4">
         {t("canary")}
       </h3>
-      <div className="bg-bg-card border border-border rounded-2xl p-5 space-y-5">
+      <div className="bg-bg-card border border-border rounded-2xl p-5 space-y-6">
         {canaryPhases.map((phase, idx) => {
           const stablePct = 100 - phase.canaryPct;
+          const isLast = phase.canaryPct === 100;
           return (
             <motion.div
               key={phase.label}
@@ -249,34 +288,37 @@ function CanaryDeployment() {
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.12 }}
             >
+              {/* Header row */}
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-text-primary">
-                  {phase.label}
+                  {isZh ? phase.labelZh : phase.label}
                 </span>
                 <div className="flex items-center gap-3 text-xs text-text-secondary">
-                  {phase.canaryPct < 100 && (
-                    <span>
-                      <span className="text-cyan font-semibold">
-                        {phase.canaryPct}%
-                      </span>{" "}
-                      canary
-                    </span>
+                  {!isLast && (
+                    <>
+                      <span>
+                        <span className="text-cyan font-semibold">
+                          {phase.canaryPct}%
+                        </span>{" "}
+                        canary
+                      </span>
+                      <span>
+                        <span className="text-text-secondary/60 font-semibold">
+                          {stablePct}%
+                        </span>{" "}
+                        stable
+                      </span>
+                    </>
                   )}
-                  {stablePct > 0 && phase.canaryPct < 100 && (
-                    <span>
-                      <span className="text-text-secondary/60 font-semibold">
-                        {stablePct}%
-                      </span>{" "}
-                      stable
-                    </span>
-                  )}
-                  {phase.canaryPct === 100 && (
+                  {isLast && (
                     <span className="text-cyan font-semibold">
                       100% canary
                     </span>
                   )}
                 </div>
               </div>
+
+              {/* Progress bar */}
               <div className="h-3 bg-bg-primary rounded-full overflow-hidden flex">
                 <motion.div
                   className="h-full bg-gradient-to-r from-cyan to-accent-start rounded-full"
@@ -296,9 +338,66 @@ function CanaryDeployment() {
                   />
                 )}
               </div>
+
+              {/* Criteria + wait time */}
+              <div className="mt-2 flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <svg className="w-3.5 h-3.5 text-text-secondary/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+                  </svg>
+                  <span className="text-xs text-text-secondary font-medium">
+                    {isZh ? phase.waitZh : phase.wait}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(isZh ? phase.criteriaZh : phase.criteria).map((c) => (
+                    <span
+                      key={c}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-success/10 text-success border border-success/20"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Arrow to next phase */}
+              {idx < canaryPhases.length - 1 && (
+                <div className="flex justify-center mt-3 text-text-secondary/30">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </div>
+              )}
             </motion.div>
           );
         })}
+
+        {/* Auto-rollback section */}
+        <div className="pt-4 border-t border-border">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="text-sm font-medium text-text-primary">
+              {isZh ? "自動回滾條件" : "Auto-Rollback Triggers"}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {ROLLBACK_TRIGGERS.map((trigger) => (
+              <span
+                key={trigger.label}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-red-500/10 text-red-400 border border-red-500/20"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                {isZh ? trigger.labelZh : trigger.label}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
