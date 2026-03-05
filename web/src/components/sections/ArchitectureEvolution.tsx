@@ -3,8 +3,9 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { phases } from "@/data/architecture-nodes";
+import { phases, getDynamicMetrics } from "@/data/architecture-nodes";
 import type { ArchNode } from "@/data/architecture-nodes";
+import { useCapacity } from "@/contexts/CapacityContext";
 import ArchitectureNode from "@/components/architecture/ArchitectureNode";
 import ArchitectureEdge from "@/components/architecture/ArchitectureEdge";
 import MetricsPanel from "@/components/architecture/MetricsPanel";
@@ -43,6 +44,12 @@ export default function ArchitectureEvolution() {
   }, []);
 
   const data = phases[activePhase];
+
+  const { result, input } = useCapacity();
+  const dynamicMetrics = useMemo(
+    () => getDynamicMetrics(activePhase, result, input),
+    [activePhase, result, input]
+  );
 
   /* Build a node lookup map */
   const nodeMap = useMemo(() => {
@@ -146,7 +153,7 @@ export default function ArchitectureEvolution() {
         </div>
 
         {/* Metrics panel */}
-        <MetricsPanel metrics={data.metrics} phaseKey={activePhase} />
+        <MetricsPanel metrics={dynamicMetrics} phaseKey={activePhase} />
       </div>
     </SectionWrapper>
   );

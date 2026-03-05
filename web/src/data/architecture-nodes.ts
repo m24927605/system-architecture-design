@@ -364,3 +364,35 @@ export const phases: Record<string, PhaseData> = {
 /* Node dimensions (used for edge calculations) */
 export const NODE_WIDTH = 130;
 export const NODE_HEIGHT = 52;
+
+/* ------------------------------------------------------------------ */
+/*  Dynamic metrics — merge capacity-calculator results into phase    */
+/* ------------------------------------------------------------------ */
+import type { CapacityResult, CapacityInput } from "@/data/capacity";
+
+export function getDynamicMetrics(
+  phaseKey: string,
+  result: CapacityResult,
+  input: CapacityInput
+): PhaseMetrics {
+  const base = phases[phaseKey]?.metrics;
+  if (!base) return phases.phase1.metrics;
+
+  if (phaseKey === "phase1") {
+    return {
+      ...base,
+      monthlyCost: `$${Math.round(result.managedMonthlyCost).toLocaleString()}`,
+      throughput: `~${result.totalSttCapacity.toFixed(0)} tasks/min`,
+    };
+  }
+
+  return {
+    ...base,
+    monthlyCost: `$${Math.round(result.selfHostedMonthlyCost).toLocaleString()}`,
+    throughput: `~${result.totalSttCapacity.toFixed(0)} tasks/min`,
+    aiModels:
+      phaseKey === "phase2"
+        ? `Whisper (RTF ${input.whisperRtf}) + vLLM (${result.sttGpus}+${result.llmGpus} GPUs)`
+        : `Multi-GPU Pool (${result.sttGpus}+${result.llmGpus} GPUs)`,
+  };
+}
