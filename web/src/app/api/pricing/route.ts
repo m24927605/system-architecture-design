@@ -22,6 +22,7 @@ async function fetchLivePricing(): Promise<AwsPricingSnapshot | null> {
     const ec2: AwsPricingSnapshot["ec2"] = {};
     const targetInstances = ["g5.xlarge", "g5.2xlarge", "g5.4xlarge"];
 
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     for (const [sku, product] of Object.entries(products) as [string, any][]) {
       const attrs = product.attributes;
       if (
@@ -42,6 +43,7 @@ async function fetchLivePricing(): Promise<AwsPricingSnapshot | null> {
         const firstDim = Object.values(firstTerm.priceDimensions)[0] as any;
         onDemandPerHour = parseFloat(firstDim.pricePerUnit.USD);
       }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
       const base = fallbackSnapshot as AwsPricingSnapshot;
       ec2[attrs.instanceType] = {
