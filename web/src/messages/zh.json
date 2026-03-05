@@ -87,7 +87,10 @@
   },
   "traits": {
     "title": "架構特性",
-    "subtitle": "系統品質的七個維度",
+    "subtitle": "系統品質的七個維度 — 隨階段演進",
+    "phase1": "Phase 1: MVP",
+    "phase2": "Phase 2: Growth",
+    "phase3": "Phase 3: Scale",
     "scalability": "擴展性",
     "faultTolerance": "容錯機制",
     "consistency": "資料一致性",

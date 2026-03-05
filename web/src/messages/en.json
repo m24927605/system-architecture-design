@@ -87,7 +87,10 @@
   },
   "traits": {
     "title": "Architecture Characteristics",
-    "subtitle": "Seven dimensions of system quality",
+    "subtitle": "Seven dimensions of system quality — evolving with each phase",
+    "phase1": "Phase 1: MVP",
+    "phase2": "Phase 2: Growth",
+    "phase3": "Phase 3: Scale",
     "scalability": "Scalability",
     "faultTolerance": "Fault Tolerance",
     "consistency": "Data Consistency",
