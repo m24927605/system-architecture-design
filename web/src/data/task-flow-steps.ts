@@ -66,12 +66,12 @@ export const flowSteps: FlowStep[] = [
     action: "Call model",
     target: "Whisper / Transcribe",
     detail:
-      "GPU inference ~5-10s per 1-min audio. Redis SETNX for idempotency.",
+      "GPU inference time = audio_duration x RTF (e.g., 3-min audio at RTF 0.10 = 18s). Redis SETNX for idempotency.",
     color: "text-cyan",
     actorZh: "STT Worker",
     actionZh: "呼叫模型",
     targetZh: "Whisper / Transcribe",
-    detailZh: "GPU 推理 ~5-10 秒/分鐘音檔，Redis SETNX 冪等鎖",
+    detailZh: "GPU 推理時間 = 音檔長度 x RTF（如 3 分鐘音檔 RTF 0.10 = 18 秒），Redis SETNX 冪等鎖",
   },
   {
     id: 6,
