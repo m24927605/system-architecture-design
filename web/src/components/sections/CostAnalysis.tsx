@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   LineChart,
   Line,
@@ -12,13 +12,14 @@ import {
   ReferenceLine,
 } from "recharts";
 import { useTranslations } from "next-intl";
-import { costData } from "@/data/costs";
+import { useCapacity } from "@/contexts/CapacityContext";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import GradientText from "@/components/ui/GradientText";
 
 type ViewMode = "monthly" | "perTask";
 
 function formatTasks(value: number): string {
+  if (value >= 1000000) return `${value / 1000000}M`;
   if (value >= 1000) return `${value / 1000}K`;
   return value.toString();
 }
@@ -67,7 +68,15 @@ function PerTaskTooltip({ active, payload, label }: any) {
 
 export default function CostAnalysis() {
   const t = useTranslations("cost");
+  const { costCurveData } = useCapacity();
   const [viewMode, setViewMode] = useState<ViewMode>("monthly");
+
+  const crossoverTasks = useMemo(() => {
+    for (const point of costCurveData) {
+      if (point.selfHosted <= point.managed) return point.tasks;
+    }
+    return null;
+  }, [costCurveData]);
 
   const managedKey = viewMode === "monthly" ? "managed" : "managedPerTask";
   const selfHostedKey =
@@ -126,7 +135,7 @@ export default function CostAnalysis() {
         {/* Chart */}
         <ResponsiveContainer width="100%" height={400}>
           <LineChart
-            data={costData}
+            data={costCurveData}
             margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
           >
             <CartesianGrid stroke="#1E1E2E" strokeDasharray="3 3" />
@@ -146,21 +155,23 @@ export default function CostAnalysis() {
             <YAxis
               stroke="#94A3B8"
               tick={{ fill: "#94A3B8", fontSize: 12 }}
-              tickFormatter={(v: number) => `$${v}`}
+              tickFormatter={(v: number) =>
+                viewMode === "perTask" ? `$${v.toFixed(3)}` : `$${v}`
+              }
             />
             <Tooltip
               content={viewMode === "monthly" ? <MonthlyTooltip /> : <PerTaskTooltip />}
             />
 
-            {/* Crossover reference line at ~30K */}
-            {viewMode === "monthly" && (
+            {/* Dynamic crossover reference line */}
+            {viewMode === "monthly" && crossoverTasks && (
               <ReferenceLine
-                x={30000}
+                x={crossoverTasks}
                 stroke="#6366F1"
                 strokeDasharray="6 4"
                 strokeWidth={1.5}
                 label={{
-                  value: t("crossoverPoint"),
+                  value: `${t("crossoverPoint")} ~${formatTasks(crossoverTasks)}`,
                   position: "top",
                   fill: "#94A3B8",
                   fontSize: 11,
