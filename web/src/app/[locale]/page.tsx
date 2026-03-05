@@ -9,29 +9,32 @@ import ArchitectureTraits from "@/components/sections/ArchitectureTraits";
 import Observability from "@/components/sections/Observability";
 import DeploymentPipeline from "@/components/sections/DeploymentPipeline";
 import ChatWidget from "@/components/chat/ChatWidget";
+import { CapacityProvider } from "@/contexts/CapacityContext";
 
 export default function Home() {
   return (
     <>
       <Navbar />
       <main>
-        <Hero />
+        <CapacityProvider>
+          <Hero />
 
-        <ArchitectureEvolution />
+          <ArchitectureEvolution />
 
-        <TaskFlow />
+          <TaskFlow />
 
-        <CapacityCalculator />
+          <CapacityCalculator />
 
-        <CostAnalysis />
+          <CostAnalysis />
 
-        <TechSelection />
+          <TechSelection />
 
-        <ArchitectureTraits />
+          <ArchitectureTraits />
 
-        <Observability />
+          <Observability />
 
-        <DeploymentPipeline />
+          <DeploymentPipeline />
+        </CapacityProvider>
       </main>
       <ChatWidget />
     </>
