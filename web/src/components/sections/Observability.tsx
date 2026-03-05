@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import {
   obsPhases,
+  obsFlows,
   alertTiers,
   metricCategories,
   dashboardServices,
@@ -106,6 +107,12 @@ function ObsStackDiagram({
     return m;
   }, [data.nodes]);
 
+  /* Get current phase's flow steps */
+  const currentFlowSteps = useMemo(() => {
+    const pf = obsFlows.find((p) => p.key === activePhase);
+    return pf?.steps ?? [];
+  }, [activePhase]);
+
   const handleTab = useCallback((key: ObsPhaseKey) => {
     setActivePhase(key);
   }, []);
@@ -145,7 +152,7 @@ function ObsStackDiagram({
         {/* Diagram */}
         <div
           ref={containerRef}
-          className="flex-1 rounded-2xl border border-border bg-bg-card/40 overflow-hidden"
+          className="flex-1 rounded-2xl border border-border bg-bg-card/40 overflow-visible"
           style={{ minHeight: BASE_H * scale + 20 }}
         >
           <div
@@ -181,17 +188,26 @@ function ObsStackDiagram({
 
             {/* Node layer */}
             <AnimatePresence mode="popLayout">
-              {data.nodes.map((node) => (
-                <ArchitectureNode
-                  key={`${activePhase}-${node.id}`}
-                  id={node.id}
-                  label={node.label}
-                  type={node.type}
-                  x={node.position.x}
-                  y={node.position.y}
-                  scale={scale}
-                />
-              ))}
+              {data.nodes.map((node) => {
+                const nodeFlowSteps = node.steps
+                  ? currentFlowSteps.filter((s) => node.steps!.includes(s.id))
+                  : undefined;
+
+                return (
+                  <ArchitectureNode
+                    key={`${activePhase}-${node.id}`}
+                    id={node.id}
+                    label={node.label}
+                    type={node.type}
+                    x={node.position.x}
+                    y={node.position.y}
+                    scale={scale}
+                    steps={node.steps}
+                    flowSteps={nodeFlowSteps}
+                    canvasWidth={BASE_W * scale}
+                  />
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>
