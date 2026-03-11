@@ -174,7 +174,7 @@ const phase2: PhaseData = {
       id: "llm-queue",
       label: "LLM Queue\n(SQS)",
       type: "queue",
-      position: { x: 410, y: 310 },
+      position: { x: 560, y: 250 },
       steps: [6, 11, 12],
     },
     {
@@ -195,7 +195,7 @@ const phase2: PhaseData = {
       id: "llm-worker",
       label: "LLM Worker",
       type: "worker",
-      position: { x: 560, y: 310 },
+      position: { x: 720, y: 250 },
       steps: [7, 8],
     },
     {
@@ -209,7 +209,7 @@ const phase2: PhaseData = {
       id: "vllm",
       label: "vLLM Server\n(GPU)",
       type: "gpu",
-      position: { x: 720, y: 310 },
+      position: { x: 720, y: 390 },
       steps: [7],
     },
     {
@@ -299,7 +299,7 @@ const phase3: PhaseData = {
       id: "llm-queue",
       label: "LLM Queue",
       type: "queue",
-      position: { x: 440, y: 340 },
+      position: { x: 580, y: 240 },
       steps: [6, 11, 12],
     },
     {
@@ -320,7 +320,7 @@ const phase3: PhaseData = {
       id: "llm-workers",
       label: "LLM Workers\n(KEDA)",
       type: "worker",
-      position: { x: 580, y: 300 },
+      position: { x: 730, y: 240 },
       steps: [7, 8],
     },
     {
@@ -334,7 +334,7 @@ const phase3: PhaseData = {
       id: "vllm-pool",
       label: "vLLM\nGPU Pool",
       type: "gpu",
-      position: { x: 730, y: 300 },
+      position: { x: 730, y: 390 },
       steps: [7],
     },
     {
