@@ -21,7 +21,7 @@ A **3-phase evolutionary architecture** (MVP → Growth → Scale) instead of de
 |-----------|-------------|-----------------|----------------|
 | **Monthly Cost** | $800-1,500 | $3,000-6,000 | $10,000-25,000 |
 | **Cost per Task** | ~$0.027 | ~$0.008-0.012 | ~$0.004-0.008 |
-| **Processing Throughput** | ~50 tasks/min | ~10-50 tasks/min (sustained) | ~1,000+ tasks/min |
+| **Processing Throughput** | ~10-20 tasks/min | ~20-50 tasks/min (sustained) | ~200-1,000+ tasks/min |
 | **Compute** | ECS Fargate | EKS | EKS + KEDA + Cluster Autoscaler |
 | **AI Models** | AWS Transcribe + Bedrock | Self-hosted Whisper + vLLM (1 GPU each) | Multi-GPU pool (Spot + On-Demand) |
 | **Deployment** | ECS Rolling Update | EKS Rolling Update | Argo Rollouts Canary |
@@ -31,7 +31,7 @@ A **3-phase evolutionary architecture** (MVP → Growth → Scale) instead of de
 
 ## Phase 1: MVP Architecture
 
-**Target:** ~50 tasks/min | < 50K tasks/month | POC validation
+**Target:** ~10-20 tasks/min | < 50K tasks/month | POC validation
 
 ```
 User → API (ECS Fargate, Go+Echo)
@@ -67,7 +67,7 @@ User → API → Redis (cache hit) or PostgreSQL (cache miss) → Return result
 
 ## Phase 2: Growth Architecture
 
-**Target:** ~200 tasks/min (burst) | 50K-500K tasks/month | Proven product-market fit
+**Target:** ~20-50 tasks/min (sustained), burst to ~100-200 tasks/min | 50K-500K tasks/month | Proven product-market fit
 
 **Key changes:**
 - ECS Fargate → **EKS** (GPU node group support)
@@ -86,7 +86,7 @@ User → API → Redis (cache hit) or PostgreSQL (cache miss) → Return result
 
 ## Phase 3: Scale Architecture
 
-**Target:** ~1,000+ tasks/min | 500K+ tasks/month
+**Target:** ~200-1,000+ tasks/min | 500K+ tasks/month
 
 **Key changes:**
 - HPA (CPU-based) → **KEDA** (SQS queue depth driven)

@@ -34,7 +34,6 @@ export default function CapacityCalculator() {
   const t = useTranslations("capacity");
   const { input, setInput, result, pricing, isLive, lastUpdated } = useCapacity();
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showAssumptions, setShowAssumptions] = useState(false);
 
   const volumeSlider = valueToSlider(input.monthlyTasks);
 
@@ -71,6 +70,25 @@ export default function CapacityCalculator() {
           {isLive ? t("pricingLive") : t("pricingSnapshot")} &middot;{" "}
           {t("updatedAt")}{" "}
           {new Date(lastUpdated).toISOString().slice(0, 10)}
+        </div>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="rounded-2xl border border-border bg-bg-card/40 p-5">
+          <h3 className="text-sm font-semibold text-text-primary mb-2">
+            {t("plannerGuideTitle")}
+          </h3>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("plannerGuideBody")}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-border bg-bg-card/40 p-5">
+          <h3 className="text-sm font-semibold text-text-primary mb-2">
+            {t("priceDriversTitle")}
+          </h3>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("priceDriversBody")}
+          </p>
         </div>
       </div>
 
@@ -223,22 +241,6 @@ export default function CapacityCalculator() {
               sublabel={`Bedrock: $${result.bedrockCostPerTask.toFixed(4)}/task`}
             />
 
-          </div>
-
-          {/* Assumptions */}
-          <div className="mt-4 pt-4 border-t border-border">
-            <button
-              onClick={() => setShowAssumptions(!showAssumptions)}
-              className="text-xs text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
-            >
-              {showAssumptions ? "- " : "+ "}
-              {t("assumptions")}
-            </button>
-            {showAssumptions && (
-              <p className="mt-2 text-xs text-text-secondary leading-relaxed">
-                {t("assumptionsText")}
-              </p>
-            )}
           </div>
         </motion.div>
       </div>

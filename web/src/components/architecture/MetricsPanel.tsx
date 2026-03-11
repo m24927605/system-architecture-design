@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import type { PhaseMetrics } from "@/data/architecture-nodes";
@@ -19,6 +20,14 @@ const metricKeys: { key: keyof PhaseMetrics; labelKey: string; icon: string }[] 
 
 export default function MetricsPanel({ metrics, phaseKey }: MetricsPanelProps) {
   const t = useTranslations("architecture");
+  const [hoveredMetric, setHoveredMetric] = useState<keyof PhaseMetrics | null>(null);
+
+  const throughputExplanationKey =
+    phaseKey === "phase1"
+      ? "throughputHelpPhase1"
+      : phaseKey === "phase2"
+        ? "throughputHelpPhase2"
+        : "throughputHelpPhase3";
 
   return (
     <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">
@@ -37,7 +46,9 @@ export default function MetricsPanel({ metrics, phaseKey }: MetricsPanelProps) {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06 }}
-              className="rounded-xl border border-border bg-bg-card/60 px-4 py-3"
+              className="relative rounded-xl border border-border bg-bg-card/60 px-4 py-3"
+              onMouseEnter={() => setHoveredMetric(key)}
+              onMouseLeave={() => setHoveredMetric((current) => (current === key ? null : current))}
             >
               <div className="flex items-center gap-2 text-text-secondary text-xs mb-1">
                 <span className="text-sm">{icon}</span>
@@ -46,6 +57,19 @@ export default function MetricsPanel({ metrics, phaseKey }: MetricsPanelProps) {
               <div className="text-text-primary text-sm font-semibold">
                 {metrics[key]}
               </div>
+              <AnimatePresence>
+                {key === "throughput" && hoveredMetric === key && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 top-full z-20 mt-2 w-72 rounded-lg border border-border bg-[#12121A]/95 p-3 text-xs leading-relaxed text-text-secondary shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur"
+                  >
+                    {t(throughputExplanationKey)}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ))}
         </motion.div>

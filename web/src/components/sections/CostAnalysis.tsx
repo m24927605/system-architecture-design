@@ -117,6 +117,25 @@ export default function CostAnalysis() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="rounded-2xl border border-border bg-bg-card/40 p-5">
+          <h3 className="text-sm font-semibold text-text-primary mb-2">
+            {t("chartGuideTitle")}
+          </h3>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("chartGuideBody")}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-border bg-bg-card/40 p-5">
+          <h3 className="text-sm font-semibold text-text-primary mb-2">
+            {t("crossoverGuideTitle")}
+          </h3>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("crossoverGuideBody")}
+          </p>
+        </div>
+      </div>
+
       <div className="bg-bg-card border border-border rounded-2xl p-4 md:p-6">
         {/* Legend */}
         <div className="flex flex-wrap gap-6 mb-4">

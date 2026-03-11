@@ -63,12 +63,12 @@ function CategoryCard({
       </span>
 
       {/* Chosen tech */}
-      <h3 className="text-lg md:text-xl font-bold text-text-primary mb-2">
+      <h3 className="text-lg md:text-xl font-bold text-text-primary mb-2 whitespace-pre-line">
         {choice.chosen}
       </h3>
 
       {/* Rationale */}
-      <p className="text-sm text-text-secondary leading-relaxed mb-4">
+      <p className="text-sm text-text-secondary leading-relaxed mb-4 whitespace-pre-line">
         {rationale}
       </p>
 
@@ -109,8 +109,8 @@ function CategoryCard({
             <div className="mt-3 pt-3 border-t border-border space-y-3">
               {cat.alternatives.map((alt) => (
                 <div key={alt.name} className="flex items-start gap-2">
-                  <span className="text-warning text-sm mt-0.5 shrink-0">
-                    ✕
+                  <span className="text-text-secondary text-sm mt-0.5 shrink-0">
+                    •
                   </span>
                   <div>
                     <span className="text-sm font-medium text-text-primary">

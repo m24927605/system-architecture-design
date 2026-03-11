@@ -24,6 +24,9 @@
     "phase3": "Phase 3: Scale",
     "monthlyCost": "月成本",
     "throughput": "處理吞吐量",
+    "throughputHelpPhase1": "這是 MVP 的目標區間，不是 AWS 的硬上限。它反映的是低維運、先驗證產品的配置，搭配託管 STT/LLM 與有限 worker 併發。",
+    "throughputHelpPhase2": "這個階段以 STT 為瓶頸。1 張 A10G STT GPU 約可提供 10-12 tasks/min，因此實務上成長期若配置 2-4 張 STT GPU，約可達到 20-50 tasks/min 的穩定吞吐。",
+    "throughputHelpPhase3": "這個階段仍然主要受 STT 限制。約 20 張 STT GPU 可達 200-240 tasks/min，約 100 張 STT GPU 可達 1,000-1,200 tasks/min，因此 Scale 以較寬的容量區間表示。",
     "compute": "運算平台",
     "aiModels": "AI 模型",
     "deployment": "部署策略"
@@ -35,6 +38,10 @@
   "capacity": {
     "title": "容量規劃計算器",
     "subtitle": "根據工作量計算 GPU 需求與成本",
+    "plannerGuideTitle": "名詞定義",
+    "plannerGuideBody": "月任務量代表每月要處理多少 task。平均音檔長度會直接影響 STT 處理時間。Whisper RTF 是相對於音檔時長的處理倍率，越低代表越快。輸入與輸出 tokens 會影響託管 LLM 成本。GPU 利用率代表你預留的容量空間，不是效能加成。",
+    "priceDriversTitle": "哪些參數會影響價格",
+    "priceDriversBody": "託管成本主要受音檔分鐘數與 Bedrock token 數影響。自建成本主要受 GPU 數量影響，而 GPU 數量又取決於 STT 瓶頸、LLM 吞吐量與利用率目標。模型選擇會改變每 token 單價，RTF 與吞吐量設定則主要影響你需要幾張 GPU。",
     "monthlyVolume": "月任務量",
     "audioLength": "平均音檔長度（分鐘）",
     "recommended": "建議階段",
@@ -62,13 +69,15 @@
     "pricingSnapshot": "快照",
     "updatedAt": "更新於",
     "selfHostedTotal": "自建總成本",
-    "managedTotal": "託管總成本",
-    "assumptions": "假設條件",
-    "assumptionsText": "Region：us-east-1 (N. Virginia) | GPU: g5.xlarge On-Demand $1.006/hr（730h/月 = $734）| 利用率：70% | Whisper large-v3 | ~400 tokens/分鐘轉錄 | 自建基礎：EKS $73 + RDS Multi-AZ $95 + ElastiCache $24 + ALB $21 + CW $10 = $223/月 | 託管基礎：RDS $12 + ElastiCache $12 + CW $10 = $34/月"
+    "managedTotal": "託管總成本"
   },
   "cost": {
     "title": "成本交叉分析",
     "subtitle": "自建 GPU 何時比託管服務便宜？",
+    "chartGuideTitle": "這張圖在看什麼",
+    "chartGuideBody": "這張圖比較 task volume 增加時，託管 AI 成本與自建 GPU 成本的變化。託管成本通常會隨使用量接近線性上升；自建一開始有較高固定成本，但跨過基礎 GPU 成本後，成長斜率通常較低。",
+    "crossoverGuideTitle": "如何理解交叉點",
+    "crossoverGuideBody": "交叉點代表在相同工作量下，自建開始比託管便宜的位置。交叉點左側通常代表託管方案更便宜也更省事；交叉點右側則代表自建 GPU 通常更具成本效率。",
     "managed": "託管服務 (AWS Transcribe + Bedrock)",
     "selfHosted": "自建 GPU",
     "monthlyCost": "月成本 ($)",

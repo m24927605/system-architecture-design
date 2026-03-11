@@ -280,27 +280,27 @@ export const techCategories: TechCategory[] = [
     phases: [
       {
         phase: 1,
-        chosen: "CloudWatch",
+        chosen: "Server: CloudWatch\nLLM: Langfuse",
         rationale:
-          "Built-in with AWS. Zero setup. Sufficient for basic metrics and logs at POC stage.",
+          "CloudWatch covers server metrics, logs, alarms, and health checks with zero setup. Langfuse adds prompt, token, latency, and response tracing for managed LLM calls from day 1.",
         rationaleZh:
-          "AWS 內建，零設定。POC 階段基本的 metrics 和 logs 足夠。",
+          "CloudWatch 以零設定覆蓋伺服器 metrics、logs、alarms 與 health checks。Langfuse 則從第一天起補上託管 LLM 呼叫的 prompt、token、延遲與回應追蹤。",
       },
       {
         phase: 2,
-        chosen: "Prometheus + Grafana",
+        chosen: "Server: Prometheus + Grafana + Loki\nLLM: Langfuse",
         rationale:
-          "Custom dashboards for GPU utilization, queue depth, task processing rate. Self-hosted on EKS (~$0 extra).",
+          "Prometheus, Grafana, and Loki cover infrastructure, GPU, queue, and service observability on EKS. Langfuse separately tracks prompt versions, token usage, latency, outputs, and evaluations for self-hosted LLM traffic.",
         rationaleZh:
-          "GPU 使用率、佇列深度、任務處理率自訂儀表板。自建在 EKS 上（~$0 額外）。",
+          "Prometheus、Grafana 與 Loki 負責 EKS 上的基礎設施、GPU、佇列與服務可觀測性。Langfuse 則獨立追蹤自建 LLM 流量的 prompt 版本、token 使用量、延遲、輸出與評估。",
       },
       {
         phase: 3,
-        chosen: "Prometheus + Grafana + Loki + OTel + Tempo",
+        chosen: "Server: Prometheus + Grafana + Loki + OTel + Tempo\nLLM: Langfuse",
         rationale:
-          "Full three pillars: Metrics + Logs + Traces. trace_id propagates through entire pipeline. Alerting → PagerDuty/Slack.",
+          "Server observability uses the full three pillars stack for metrics, logs, and distributed traces across the pipeline. Langfuse remains the LLM-native layer for prompt analytics, token cost visibility, output quality, and evaluation workflows.",
         rationaleZh:
-          "完整三大支柱：Metrics + Logs + Traces。trace_id 貫穿整個管線。警報 → PagerDuty/Slack。",
+          "伺服器可觀測性使用完整三大支柱堆疊，涵蓋整條管線的 metrics、logs 與 distributed traces。Langfuse 持續作為 LLM 原生層，負責 prompt 分析、token 成本可視性、輸出品質與評估流程。",
       },
     ],
     alternatives: [

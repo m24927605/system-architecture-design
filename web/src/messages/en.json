@@ -24,6 +24,9 @@
     "phase3": "Phase 3: Scale",
     "monthlyCost": "Monthly Cost",
     "throughput": "Throughput",
+    "throughputHelpPhase1": "Target envelope for MVP, not a hard AWS limit. Sized for low-ops validation with managed STT/LLM and modest worker concurrency.",
+    "throughputHelpPhase2": "Based on STT as the bottleneck. 1 A10G STT GPU delivers about 10-12 tasks/min, so a practical Growth setup with 2-4 STT GPUs yields about 20-50 tasks/min sustained.",
+    "throughputHelpPhase3": "Also STT-bound. Roughly 20 STT GPUs deliver about 200-240 tasks/min, and about 100 STT GPUs deliver about 1,000-1,200 tasks/min, so Scale is shown as a broad capacity range.",
     "compute": "Compute",
     "aiModels": "AI Models",
     "deployment": "Deployment"
@@ -35,6 +38,10 @@
   "capacity": {
     "title": "Capacity Planner",
     "subtitle": "Calculate GPU requirements and costs for your workload",
+    "plannerGuideTitle": "Term Definitions",
+    "plannerGuideBody": "Monthly volume is how many tasks you process per month. Audio length affects STT time directly. Whisper RTF means processing time relative to audio duration: lower is faster. Input and output tokens drive managed LLM cost. GPU utilization is your target headroom, not a performance boost.",
+    "priceDriversTitle": "What Changes Price",
+    "priceDriversBody": "Managed cost is driven mostly by audio minutes and Bedrock tokens. Self-hosted cost is driven mostly by GPU count, which depends on STT bottleneck, LLM throughput, and your utilization target. Model choice changes per-token pricing, while RTF and throughput settings mainly change how many GPUs you need.",
     "monthlyVolume": "Monthly Task Volume",
     "audioLength": "Average Audio Length (min)",
     "recommended": "Recommended Phase",
@@ -62,13 +69,15 @@
     "pricingSnapshot": "Snapshot",
     "updatedAt": "Updated",
     "selfHostedTotal": "Self-Hosted Total",
-    "managedTotal": "Managed Total",
-    "assumptions": "Assumptions",
-    "assumptionsText": "Region: us-east-1 (N. Virginia) | GPU: g5.xlarge On-Demand $1.006/hr (730h/mo = $734) | Utilization: 70% | Whisper large-v3 | ~400 tokens/min transcription | Self-hosted base: EKS $73 + RDS Multi-AZ $95 + ElastiCache $24 + ALB $21 + CW $10 = $223/mo | Managed base: RDS $12 + ElastiCache $12 + CW $10 = $34/mo"
+    "managedTotal": "Managed Total"
   },
   "cost": {
     "title": "Cost Crossover Analysis",
     "subtitle": "When does self-hosting GPU become cheaper than managed services?",
+    "chartGuideTitle": "What This Chart Shows",
+    "chartGuideBody": "The chart compares managed AI cost and self-hosted GPU cost as task volume grows. Managed pricing rises almost linearly with usage, while self-hosted starts higher but grows more slowly after the fixed GPU baseline is covered.",
+    "crossoverGuideTitle": "How to Read the Crossover",
+    "crossoverGuideBody": "The crossover point is where self-hosted becomes cheaper than managed service for the same workload. Left of that line, managed is usually simpler and cheaper. Right of that line, GPU self-hosting usually becomes the more cost-efficient choice.",
     "managed": "Managed (AWS Transcribe + Bedrock)",
     "selfHosted": "Self-Hosted (GPU)",
     "monthlyCost": "Monthly Cost ($)",

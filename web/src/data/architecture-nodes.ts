@@ -40,6 +40,19 @@ export interface PhaseData {
   metrics: PhaseMetrics;
 }
 
+function getPhaseThroughputLabel(phaseKey: string): string {
+  switch (phaseKey) {
+    case "phase1":
+      return "~10-20 tasks/min";
+    case "phase2":
+      return "~20-50 tasks/min";
+    case "phase3":
+      return "~200-1,000+ tasks/min";
+    default:
+      return "~10-20 tasks/min";
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  Phase 1: MVP  — ECS Fargate + Managed AI                         */
 /* ------------------------------------------------------------------ */
@@ -109,6 +122,13 @@ const phase1: PhaseData = {
       position: { x: 380, y: 400 },
       steps: [8],
     },
+    {
+      id: "langfuse",
+      label: "Langfuse\n(LLM Tracing)",
+      type: "monitoring",
+      position: { x: 740, y: 400 },
+      steps: [6],
+    },
   ],
   edges: [
     { id: "e-user-api", source: "user", target: "api" },
@@ -120,10 +140,11 @@ const phase1: PhaseData = {
     { id: "e-llm-bedrock", source: "llm-worker", target: "bedrock" },
     { id: "e-api-rds", source: "api", target: "rds" },
     { id: "e-api-redis", source: "api", target: "redis" },
+    { id: "e-llm-langfuse", source: "llm-worker", target: "langfuse" },
   ],
   metrics: {
     monthlyCost: "$800 – $1,500",
-    throughput: "~50 tasks/min",
+    throughput: "~10-20 tasks/min",
     compute: "ECS Fargate",
     aiModels: "AWS Transcribe + Bedrock",
     deployment: "Rolling Update",
@@ -148,7 +169,7 @@ const phase2: PhaseData = {
       label: "API Service\n(EKS)",
       type: "api",
       position: { x: 260, y: 210 },
-      steps: [1, 3, 4],
+      steps: [1, 3, 4, 9],
     },
     {
       id: "stt-queue",
@@ -211,7 +232,7 @@ const phase2: PhaseData = {
       label: "RDS PostgreSQL\n(Multi-AZ)",
       type: "db",
       position: { x: 130, y: 400 },
-      steps: [3, 6, 8],
+      steps: [3, 6, 8, 9],
     },
     {
       id: "redis",
@@ -225,6 +246,14 @@ const phase2: PhaseData = {
       label: "Prometheus\n+ Grafana",
       type: "monitoring",
       position: { x: 720, y: 430 },
+      steps: [9],
+    },
+    {
+      id: "langfuse",
+      label: "Langfuse\n(LLM Tracing)",
+      type: "monitoring",
+      position: { x: 720, y: 210 },
+      steps: [7],
     },
   ],
   edges: [
@@ -232,7 +261,6 @@ const phase2: PhaseData = {
     { id: "e-user-s3", source: "user", target: "s3" },
     { id: "e-alb-api", source: "alb", target: "api" },
     { id: "e-api-stt-q", source: "api", target: "stt-queue" },
-    { id: "e-api-llm-q", source: "api", target: "llm-queue" },
     { id: "e-stt-q-worker", source: "stt-queue", target: "stt-worker" },
     { id: "e-llm-q-worker", source: "llm-queue", target: "llm-worker" },
     { id: "e-stt-whisper", source: "stt-worker", target: "whisper" },
@@ -241,12 +269,18 @@ const phase2: PhaseData = {
     { id: "e-llm-q-dlq", source: "llm-queue", target: "dlq" },
     { id: "e-api-rds", source: "api", target: "rds" },
     { id: "e-api-redis", source: "api", target: "redis" },
+    { id: "e-stt-rds", source: "stt-worker", target: "rds" },
+    { id: "e-stt-llm-q", source: "stt-worker", target: "llm-queue" },
+    { id: "e-llm-rds", source: "llm-worker", target: "rds" },
+    { id: "e-llm-redis", source: "llm-worker", target: "redis" },
     { id: "e-whisper-mon", source: "whisper", target: "monitoring" },
     { id: "e-vllm-mon", source: "vllm", target: "monitoring" },
+    { id: "e-api-mon", source: "api", target: "monitoring" },
+    { id: "e-llm-langfuse", source: "llm-worker", target: "langfuse" },
   ],
   metrics: {
     monthlyCost: "$3,000 – $6,000",
-    throughput: "~10-50 tasks/min",
+    throughput: "~20-50 tasks/min",
     compute: "EKS",
     aiModels: "Whisper + vLLM (1 GPU each)",
     deployment: "Rolling Update",
@@ -278,7 +312,7 @@ const phase3: PhaseData = {
       label: "API Service\n(HPA)",
       type: "api",
       position: { x: 310, y: 220 },
-      steps: [1, 3, 4],
+      steps: [1, 3, 4, 9],
     },
     {
       id: "stt-queue",
@@ -341,7 +375,7 @@ const phase3: PhaseData = {
       label: "RDS Multi-AZ\n+ Read Replica",
       type: "db",
       position: { x: 100, y: 410 },
-      steps: [3, 6, 8],
+      steps: [3, 6, 8, 9],
     },
     {
       id: "redis",
@@ -361,6 +395,14 @@ const phase3: PhaseData = {
       label: "Full Observability\nStack",
       type: "monitoring",
       position: { x: 730, y: 450 },
+      steps: [9],
+    },
+    {
+      id: "langfuse",
+      label: "Langfuse\n(LLM Tracing)",
+      type: "monitoring",
+      position: { x: 730, y: 220 },
+      steps: [7],
     },
   ],
   edges: [
@@ -369,7 +411,6 @@ const phase3: PhaseData = {
     { id: "e-cf-alb", source: "cloudfront", target: "alb" },
     { id: "e-alb-api", source: "alb", target: "api" },
     { id: "e-api-stt-q", source: "api", target: "stt-queue" },
-    { id: "e-api-llm-q", source: "api", target: "llm-queue" },
     { id: "e-stt-q-workers", source: "stt-queue", target: "stt-workers" },
     { id: "e-llm-q-workers", source: "llm-queue", target: "llm-workers" },
     { id: "e-stt-whisper", source: "stt-workers", target: "whisper-pool" },
@@ -378,13 +419,19 @@ const phase3: PhaseData = {
     { id: "e-llm-q-dlq", source: "llm-queue", target: "dlq" },
     { id: "e-api-rds", source: "api", target: "rds" },
     { id: "e-api-redis", source: "api", target: "redis" },
+    { id: "e-stt-rds", source: "stt-workers", target: "rds" },
+    { id: "e-stt-llm-q", source: "stt-workers", target: "llm-queue" },
+    { id: "e-llm-rds", source: "llm-workers", target: "rds" },
+    { id: "e-llm-redis", source: "llm-workers", target: "redis" },
     { id: "e-api-argo", source: "api", target: "argo" },
+    { id: "e-api-obs", source: "api", target: "observability" },
     { id: "e-whisper-obs", source: "whisper-pool", target: "observability" },
     { id: "e-vllm-obs", source: "vllm-pool", target: "observability" },
+    { id: "e-llm-langfuse", source: "llm-workers", target: "langfuse" },
   ],
   metrics: {
     monthlyCost: "$10,000 – $25,000",
-    throughput: "~1,000+ tasks/min",
+    throughput: "~200-1,000+ tasks/min",
     compute: "EKS + KEDA",
     aiModels: "Multi-GPU Pool",
     deployment: "Argo Rollouts (Canary)",
@@ -418,14 +465,14 @@ export function getDynamicMetrics(
     return {
       ...base,
       monthlyCost: `$${Math.round(result.managedMonthlyCost).toLocaleString()}`,
-      throughput: `~${result.totalSttCapacity.toFixed(0)} tasks/min`,
+      throughput: getPhaseThroughputLabel(phaseKey),
     };
   }
 
   return {
     ...base,
     monthlyCost: `$${Math.round(result.selfHostedMonthlyCost).toLocaleString()}`,
-    throughput: `~${result.totalSttCapacity.toFixed(0)} tasks/min`,
+    throughput: getPhaseThroughputLabel(phaseKey),
     aiModels:
       phaseKey === "phase2"
         ? `Whisper (RTF ${input.whisperRtf}) + vLLM (${result.sttGpus}+${result.llmGpus} GPUs)`

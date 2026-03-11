@@ -35,7 +35,7 @@ All throughput estimates are derived from measured GPU inference speeds, not arb
 
 ### 2.2 Phase 1: MVP
 
-**Target:** ~50 tasks/min processing throughput | < 50K tasks/month | POC validation
+**Target:** ~10-20 tasks/min sustained throughput | < 50K tasks/month | POC validation
 
 The MVP prioritizes speed-to-market and operational simplicity. No GPUs, no Kubernetes — we use fully managed AWS AI services and serverless compute to minimize the ops surface area.
 
@@ -132,7 +132,7 @@ graph TB
 
 ### 2.3 Phase 2: Growth
 
-**Target:** ~200 tasks/min peak throughput (with auto-scaling) | 50K-500K tasks/month | Proven product-market fit
+**Target:** ~20-50 tasks/min sustained throughput | burst to ~100-200 tasks/min | 50K-500K tasks/month | Proven product-market fit
 
 Phase 2 introduces self-hosted GPU models and Kubernetes orchestration. The marginal cost per task drops significantly, and we gain full control over model versions and inference parameters.
 
@@ -268,7 +268,7 @@ For burst handling up to 200 tasks/min, the SQS queue absorbs the burst. The que
 
 ### 2.4 Phase 3: Scale
 
-**Target:** ~1,000+ tasks/min sustained throughput | 500K+ tasks/month | High-traffic production
+**Target:** ~200-1,000+ tasks/min sustained throughput | 500K+ tasks/month | High-traffic production
 
 Phase 3 is the fully mature architecture with event-driven auto-scaling, multi-GPU pools, canary deployments, and comprehensive observability. Every component is designed for high availability and operational excellence.
 
@@ -451,7 +451,7 @@ func main() {
 |-----------|-------------|-----------------|----------------|
 | **Monthly Cost** | $800-1,500 | $3,000-6,000 | $10,000-25,000 |
 | **Cost per Task** | ~$0.027 (Transcribe-dominated) | ~$0.008-0.012 | ~$0.004-0.008 |
-| **Processing Throughput** | ~50 tasks/min (managed API limit) | ~10-50 tasks/min sustained (GPU-bound) | ~1,000+ tasks/min (multi-GPU) |
+| **Processing Throughput** | ~10-20 tasks/min sustained | ~20-50 tasks/min sustained | ~200-1,000+ tasks/min sustained |
 | **Burst Handling** | Limited by managed API rate limits | SQS absorbs bursts; GPU processes steadily | KEDA + Cluster Autoscaler provisions GPU on demand |
 | **Compute** | ECS Fargate (serverless) | EKS (managed K8s) | EKS + KEDA + Cluster Autoscaler |
 | **AI Models** | AWS Transcribe + Bedrock | Self-hosted Whisper + vLLM (1 GPU each) | Multi-GPU pool (Spot + On-Demand) |
