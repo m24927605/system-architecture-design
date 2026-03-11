@@ -223,17 +223,6 @@ export default function CapacityCalculator() {
               sublabel={`Bedrock: $${result.bedrockCostPerTask.toFixed(4)}/task`}
             />
 
-            {/* Savings */}
-            <div className="col-span-2 pt-4 border-t border-border flex items-center justify-between">
-              <span className="text-sm text-text-secondary">{t("savings")}</span>
-              <span
-                className={`text-2xl font-bold tabular-nums ${
-                  result.savings > 0 ? "text-success" : "text-warning"
-                }`}
-              >
-                {result.savings}%
-              </span>
-            </div>
           </div>
 
           {/* Assumptions */}

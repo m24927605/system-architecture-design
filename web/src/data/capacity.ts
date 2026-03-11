@@ -22,7 +22,6 @@ export interface CapacityResult {
   bedrockCostPerTask: number;
   bedrockMonthlyCost: number;
   managedMonthlyCost: number;
-  savings: number;
   sttTasksPerMinPerGpu: number;
   totalSttCapacity: number;
 }
@@ -77,11 +76,6 @@ export function calculateCapacity(
   const bedrockMonthlyCost = monthlyTasks * bedrockCostPerTask;
   const managedMonthlyCost = transcribeMonthlyCost + bedrockMonthlyCost + BASE_MANAGED_INFRA;
 
-  // Savings
-  const savings = managedMonthlyCost > 0
-    ? Math.round(((managedMonthlyCost - selfHostedMonthlyCost) / managedMonthlyCost) * 100)
-    : 0;
-
   // Phase recommendation
   let recommendedPhase: 1 | 2 | 3;
   let phaseName: string;
@@ -94,7 +88,7 @@ export function calculateCapacity(
   return {
     recommendedPhase, phaseName, sttGpus, llmGpus, gpuCostPerMonth,
     selfHostedMonthlyCost, transcribeMonthlyCost, bedrockCostPerTask,
-    bedrockMonthlyCost, managedMonthlyCost, savings, sttTasksPerMinPerGpu,
+    bedrockMonthlyCost, managedMonthlyCost, sttTasksPerMinPerGpu,
     totalSttCapacity,
   };
 }

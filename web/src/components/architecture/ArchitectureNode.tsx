@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "next-intl";
 import type { NodeType } from "@/data/architecture-nodes";
@@ -104,34 +104,25 @@ export default function ArchitectureNode({
   const isZh = locale === "zh";
 
   const [hovered, setHovered] = useState(false);
-  const [tooltipSide, setTooltipSide] = useState<"bottom" | "top">("bottom");
-  const [tooltipAlign, setTooltipAlign] = useState<"left" | "center" | "right">("center");
-  const nodeRef = useRef<HTMLDivElement>(null);
 
   const w = 130 * scale;
   const h = 52 * scale;
   const fontSize = Math.max(9, 11 * scale);
   const tooltipW = Math.max(280, 320 * scale);
+  const nodeLeft = x * scale;
+  const nodeTop = y * scale;
+  const canvasRight = canvasWidth ?? 900 * scale;
+  const tooltipCenter = nodeLeft + w / 2;
 
   const hasSteps = flowSteps && flowSteps.length > 0;
-
-  useEffect(() => {
-    if (!hovered || !nodeRef.current) return;
-    const nodeLeft = x * scale;
-    const nodeTop = y * scale;
-    const cw = canvasWidth ?? 900 * scale;
-
-    setTooltipSide(nodeTop + h + 120 > 520 * scale ? "top" : "bottom");
-
-    const tooltipCenter = nodeLeft + w / 2;
-    if (tooltipCenter - tooltipW / 2 < 0) {
-      setTooltipAlign("left");
-    } else if (tooltipCenter + tooltipW / 2 > cw) {
-      setTooltipAlign("right");
-    } else {
-      setTooltipAlign("center");
-    }
-  }, [hovered, x, y, scale, w, h, tooltipW, canvasWidth]);
+  const tooltipSide: "bottom" | "top" =
+    nodeTop + h + 120 > 520 * scale ? "top" : "bottom";
+  const tooltipAlign: "left" | "center" | "right" =
+    tooltipCenter - tooltipW / 2 < 0
+      ? "left"
+      : tooltipCenter + tooltipW / 2 > canvasRight
+        ? "right"
+        : "center";
 
   const tooltipStyle: React.CSSProperties = {
     position: "absolute",
@@ -148,7 +139,6 @@ export default function ArchitectureNode({
 
   return (
     <motion.div
-      ref={nodeRef}
       layout
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -162,8 +152,8 @@ export default function ArchitectureNode({
       }}
       style={{
         position: "absolute",
-        left: x * scale,
-        top: y * scale,
+        left: nodeLeft,
+        top: nodeTop,
         width: w,
         height: h,
         background: colors.bg,

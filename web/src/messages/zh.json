@@ -42,7 +42,6 @@
     "llmGpus": "LLM GPU 數量",
     "estimatedCost": "預估月成本",
     "managedCost": "vs 託管服務成本",
-    "savings": "節省",
     "whisperRtf": "Whisper RTF (即時因子)",
     "bedrockModel": "Bedrock 模型",
     "gpuUtilization": "GPU 目標利用率",

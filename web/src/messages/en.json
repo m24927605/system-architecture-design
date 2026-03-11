@@ -42,7 +42,6 @@
     "llmGpus": "LLM GPUs Needed",
     "estimatedCost": "Estimated Monthly Cost",
     "managedCost": "vs Managed Service Cost",
-    "savings": "Savings",
     "whisperRtf": "Whisper RTF (Real-Time Factor)",
     "bedrockModel": "Bedrock Model",
     "gpuUtilization": "GPU Target Utilization",

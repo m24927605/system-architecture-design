@@ -212,7 +212,7 @@ graph TB
 | **Queue** | Single SQS queue | Two-stage SQS (STT + LLM) | Independent scaling, independent retry, independent DLQ per stage |
 | **RDS** | Single-AZ | Multi-AZ | Automatic failover for production reliability |
 | **Redis** | Single node | Multi-AZ | Automatic failover |
-| **Observability** | CloudWatch only | Prometheus + Grafana | Custom dashboards, GPU utilization metrics |
+| **Observability** | CloudWatch + Langfuse | Prometheus + Grafana + Langfuse | Add LLM-native tracing from day 1, then richer infra visibility |
 
 #### Throughput Estimate
 
@@ -252,7 +252,7 @@ For burst handling up to 200 tasks/min, the SQS queue absorbs the burst. The que
 - **Single GPU per model is a hard ceiling:** If the STT GPU is saturated, the only option is to add another GPU node (manual or cluster autoscaler, but no KEDA-driven GPU scaling yet).
 - **No KEDA:** HPA scales workers based on CPU, not SQS queue depth. This means scaling is reactive rather than proactive.
 - **No canary deployment:** Rolling updates in EKS only.
-- **Basic observability:** Prometheus + Grafana covers metrics, but no distributed tracing or centralized logging.
+- **Observability baseline:** Prometheus + Grafana + Langfuse cover metrics, dashboards, and LLM traces, but centralized logging and full distributed tracing are still limited.
 
 #### Upgrade Trigger → Phase 3
 
@@ -459,7 +459,7 @@ func main() {
 | **Cache** | ElastiCache single node | ElastiCache Multi-AZ | ElastiCache Cluster Mode |
 | **Queue** | SQS single queue | SQS two-stage (STT + LLM) | SQS two-stage + KEDA-driven scaling |
 | **Deployment** | ECS rolling update | EKS rolling update | Argo Rollouts canary (10→30→100%) |
-| **Observability** | CloudWatch | Prometheus + Grafana | Prometheus + Grafana + Loki + OTel + Tempo + PagerDuty |
+| **Observability** | CloudWatch + Langfuse | Prometheus + Grafana + Langfuse | Prometheus + Grafana + Loki + OTel + Tempo + Langfuse + PagerDuty |
 | **Fault Tolerance** | S3 + SQS durable; single-AZ DB risk | Multi-AZ DB/cache; SQS retry + DLQ | Full Multi-AZ; circuit breaker; automatic failover everywhere |
 | **Geographic Resilience** | Single-AZ; accept risk (RTO: hours) | Multi-AZ within single region (RTO: < 1 min) | Multi-Region Active-Passive / Pilot Light (RTO: 15-30 min, RPO: < 5 min) |
 | **Ops Complexity** | Minimal (all managed) | Moderate (K8s + GPU management) | High (multi-GPU, KEDA, canary, full observability) |
@@ -891,10 +891,10 @@ graph TB
 |-----------|------|-------------|
 | **Metrics** | Prometheus + Grafana | Task processing rate (tasks/min), SQS queue depth, API P95/P99 latency, GPU utilization (%), error rate (%), cache hit ratio |
 | **Logs** | Loki (structured JSON) | Per-task processing chain, error details with stack traces, model server response codes |
-| **Traces** | OpenTelemetry + Tempo | End-to-end trace per task: API → SQS → Worker → Model → DB. Each span annotated with task_id. |
+| **Traces** | OpenTelemetry + Tempo + Langfuse | Tempo handles system traces; Langfuse captures LLM prompts, model outputs, token usage, and eval metadata. |
 | **Alerting** | Grafana Alerting → PagerDuty / Slack | DLQ message count > 0, error rate > 5%, P99 > threshold, GPU node count < minimum, queue depth growing for > 10 min |
 
-**Task-level tracing:** Every task is assigned a `trace_id` at creation time. This trace_id propagates through SQS message attributes, worker logs, and model server calls. In Grafana, operators can search by task_id to see the complete processing timeline: API request → queue wait time → STT inference → LLM inference → DB write, with latency breakdowns at each step.
+**Task-level tracing:** Every task is assigned a `trace_id` at creation time. This trace_id propagates through SQS message attributes, worker logs, model server calls, and Langfuse spans. In Grafana and Langfuse, operators can inspect the full processing timeline: API request → queue wait time → STT inference → LLM inference → DB write, plus prompt version, token usage, and model response metadata.
 
 ### 5.7 Multi-Region & Disaster Recovery
 

@@ -20,73 +20,78 @@ export interface ObsPhaseData {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Phase 1: MVP — CloudWatch Only                                     */
+/*  Phase 1: MVP — CloudWatch + Langfuse                               */
 /* ------------------------------------------------------------------ */
 
 const obsPhase1: ObsPhaseData = {
   nodes: [
-    { id: "api", label: "API Service\n(ECS Fargate)", type: "api", position: { x: 80, y: 140 }, steps: [1, 6] },
+    { id: "api", label: "API Service\n(ECS Fargate)", type: "api", position: { x: 80, y: 140 }, steps: [1, 7] },
     { id: "stt-worker", label: "STT Worker\n(Fargate)", type: "worker", position: { x: 280, y: 80 }, steps: [2] },
-    { id: "llm-worker", label: "LLM Worker\n(Fargate)", type: "worker", position: { x: 280, y: 200 }, steps: [3] },
-    { id: "cloudwatch", label: "CloudWatch\n(Metrics + Logs)", type: "monitoring", position: { x: 520, y: 140 }, steps: [1, 2, 3, 4] },
-    { id: "cw-alarms", label: "CloudWatch\nAlarms", type: "monitoring", position: { x: 520, y: 290 }, steps: [4, 5] },
-    { id: "sns", label: "SNS", type: "queue", position: { x: 700, y: 290 }, steps: [5] },
-    { id: "health", label: "/health\nEndpoints", type: "external", position: { x: 80, y: 320 }, steps: [6] },
+    { id: "llm-worker", label: "LLM Worker\n(Fargate)", type: "worker", position: { x: 280, y: 200 }, steps: [3, 4] },
+    { id: "cloudwatch", label: "CloudWatch\n(Metrics + Logs)", type: "monitoring", position: { x: 520, y: 140 }, steps: [1, 2, 3, 5] },
+    { id: "langfuse", label: "Langfuse\n(LLM Traces)", type: "monitoring", position: { x: 700, y: 140 }, steps: [4] },
+    { id: "cw-alarms", label: "CloudWatch\nAlarms", type: "monitoring", position: { x: 520, y: 290 }, steps: [5, 6] },
+    { id: "sns", label: "SNS", type: "queue", position: { x: 700, y: 290 }, steps: [6] },
+    { id: "health", label: "/health\nEndpoints", type: "external", position: { x: 80, y: 320 }, steps: [7] },
   ],
   edges: [
     { id: "e-api-cw", source: "api", target: "cloudwatch" },
     { id: "e-stt-cw", source: "stt-worker", target: "cloudwatch" },
     { id: "e-llm-cw", source: "llm-worker", target: "cloudwatch" },
+    { id: "e-llm-langfuse", source: "llm-worker", target: "langfuse" },
     { id: "e-cw-alarms", source: "cloudwatch", target: "cw-alarms" },
     { id: "e-alarms-sns", source: "cw-alarms", target: "sns" },
     { id: "e-api-health", source: "api", target: "health" },
   ],
   metrics: {
-    components: "CloudWatch Metrics\n+ CloudWatch Logs",
+    components: "CloudWatch Metrics + Logs\n+ Langfuse",
     monthlyCost: "~$10–30",
-    pillars: "Metrics + Logs (basic)",
+    pillars: "Metrics + Logs + LLM Traces",
     alerting: "CloudWatch Alarms → SNS",
     ha: "Fully managed (AWS)",
   },
 };
 
 /* ------------------------------------------------------------------ */
-/*  Phase 2: Growth — Prometheus + Grafana + Loki + PagerDuty          */
+/*  Phase 2: Growth — Prometheus + Grafana + Loki + Langfuse           */
 /* ------------------------------------------------------------------ */
 
 const obsPhase2: ObsPhaseData = {
   nodes: [
     { id: "api", label: "API Service\n/metrics", type: "api", position: { x: 80, y: 80 }, steps: [1] },
     { id: "stt-worker", label: "STT Worker\n/metrics", type: "worker", position: { x: 280, y: 80 }, steps: [2] },
-    { id: "llm-worker", label: "LLM Worker\n/metrics", type: "worker", position: { x: 480, y: 80 }, steps: [3] },
+    { id: "llm-worker", label: "LLM Worker\n/metrics", type: "worker", position: { x: 480, y: 80 }, steps: [3, 7] },
     { id: "prometheus", label: "Prometheus", type: "monitoring", position: { x: 280, y: 220 }, steps: [1, 2, 3, 4] },
-    { id: "grafana", label: "Grafana\n(Dashboards + Alerting)", type: "monitoring", position: { x: 540, y: 220 }, steps: [4, 6, 7, 8] },
+    { id: "grafana", label: "Grafana\n(Dashboards + Alerting)", type: "monitoring", position: { x: 540, y: 220 }, steps: [4, 6, 8, 9] },
+    { id: "langfuse", label: "Langfuse\n(LLM Traces)", type: "monitoring", position: { x: 700, y: 220 }, steps: [7] },
     { id: "promtail", label: "Promtail\n(DaemonSet)", type: "monitoring", position: { x: 80, y: 360 }, steps: [5] },
     { id: "loki", label: "Loki", type: "monitoring", position: { x: 280, y: 360 }, steps: [5, 6] },
-    { id: "pagerduty", label: "PagerDuty", type: "external", position: { x: 540, y: 360 }, steps: [7] },
-    { id: "slack", label: "Slack", type: "external", position: { x: 700, y: 360 }, steps: [8] },
+    { id: "pagerduty", label: "PagerDuty", type: "external", position: { x: 540, y: 360 }, steps: [8] },
+    { id: "slack", label: "Slack", type: "external", position: { x: 700, y: 360 }, steps: [9] },
   ],
   edges: [
     { id: "e-api-prom", source: "api", target: "prometheus" },
     { id: "e-stt-prom", source: "stt-worker", target: "prometheus" },
     { id: "e-llm-prom", source: "llm-worker", target: "prometheus" },
     { id: "e-prom-grafana", source: "prometheus", target: "grafana" },
+    { id: "e-llm-langfuse", source: "llm-worker", target: "langfuse" },
+    { id: "e-langfuse-grafana", source: "langfuse", target: "grafana" },
     { id: "e-promtail-loki", source: "promtail", target: "loki" },
     { id: "e-loki-grafana", source: "loki", target: "grafana" },
     { id: "e-grafana-pd", source: "grafana", target: "pagerduty" },
     { id: "e-grafana-slack", source: "grafana", target: "slack" },
   ],
   metrics: {
-    components: "Prometheus + Grafana + Loki",
+    components: "Prometheus + Grafana + Loki\n+ Langfuse",
     monthlyCost: "~$0 extra",
-    pillars: "Metrics + Logs",
+    pillars: "Metrics + Logs + LLM Traces",
     alerting: "P0/P1/P2 → PagerDuty + Slack",
     ha: "Single instance",
   },
 };
 
 /* ------------------------------------------------------------------ */
-/*  Phase 3: Scale — + Tempo + OTel Collector                         */
+/*  Phase 3: Scale — + Tempo + OTel Collector + Langfuse              */
 /* ------------------------------------------------------------------ */
 
 const obsPhase3: ObsPhaseData = {
@@ -94,14 +99,15 @@ const obsPhase3: ObsPhaseData = {
     { id: "api", label: "API Service\n(OTel SDK)", type: "api", position: { x: 80, y: 60 }, steps: [1] },
     { id: "stt-worker", label: "STT Worker\n(OTel SDK)", type: "worker", position: { x: 280, y: 60 }, steps: [2] },
     { id: "llm-worker", label: "LLM Worker\n(OTel SDK)", type: "worker", position: { x: 480, y: 60 }, steps: [3] },
-    { id: "otel", label: "OTel Collector", type: "monitoring", position: { x: 280, y: 170 }, steps: [1, 2, 3, 4, 5] },
-    { id: "prometheus", label: "Prometheus\n(HA)", type: "monitoring", position: { x: 120, y: 290 }, steps: [4, 6] },
-    { id: "tempo", label: "Tempo", type: "monitoring", position: { x: 440, y: 290 }, steps: [5, 7] },
-    { id: "grafana", label: "Grafana\n(Exemplars)", type: "monitoring", position: { x: 280, y: 290 }, steps: [6, 7, 9, 10, 11] },
-    { id: "promtail", label: "Promtail\n(DaemonSet)", type: "monitoring", position: { x: 80, y: 410 }, steps: [8] },
-    { id: "loki", label: "Loki\n(Scalable)", type: "monitoring", position: { x: 280, y: 410 }, steps: [8, 9] },
-    { id: "pagerduty", label: "PagerDuty", type: "external", position: { x: 600, y: 290 }, steps: [10] },
-    { id: "slack", label: "Slack", type: "external", position: { x: 740, y: 290 }, steps: [11] },
+    { id: "otel", label: "OTel Collector", type: "monitoring", position: { x: 280, y: 170 }, steps: [1, 2, 3, 4, 5, 6] },
+    { id: "prometheus", label: "Prometheus\n(HA)", type: "monitoring", position: { x: 120, y: 290 }, steps: [4, 7] },
+    { id: "tempo", label: "Tempo", type: "monitoring", position: { x: 440, y: 290 }, steps: [5, 8] },
+    { id: "grafana", label: "Grafana\n(Exemplars)", type: "monitoring", position: { x: 280, y: 290 }, steps: [7, 8, 10, 11, 12, 13] },
+    { id: "langfuse", label: "Langfuse\n(LLM + Prompt Traces)", type: "monitoring", position: { x: 600, y: 170 }, steps: [6, 11] },
+    { id: "promtail", label: "Promtail\n(DaemonSet)", type: "monitoring", position: { x: 80, y: 410 }, steps: [9] },
+    { id: "loki", label: "Loki\n(Scalable)", type: "monitoring", position: { x: 280, y: 410 }, steps: [9, 10] },
+    { id: "pagerduty", label: "PagerDuty", type: "external", position: { x: 600, y: 290 }, steps: [12] },
+    { id: "slack", label: "Slack", type: "external", position: { x: 740, y: 290 }, steps: [13] },
   ],
   edges: [
     { id: "e-api-otel", source: "api", target: "otel" },
@@ -109,17 +115,19 @@ const obsPhase3: ObsPhaseData = {
     { id: "e-llm-otel", source: "llm-worker", target: "otel" },
     { id: "e-otel-prom", source: "otel", target: "prometheus" },
     { id: "e-otel-tempo", source: "otel", target: "tempo" },
+    { id: "e-otel-langfuse", source: "otel", target: "langfuse" },
     { id: "e-prom-grafana", source: "prometheus", target: "grafana" },
     { id: "e-tempo-grafana", source: "tempo", target: "grafana" },
+    { id: "e-langfuse-grafana", source: "langfuse", target: "grafana" },
     { id: "e-promtail-loki", source: "promtail", target: "loki" },
     { id: "e-loki-grafana", source: "loki", target: "grafana" },
     { id: "e-grafana-pd", source: "grafana", target: "pagerduty" },
     { id: "e-grafana-slack", source: "grafana", target: "slack" },
   ],
   metrics: {
-    components: "Prometheus + Grafana + Loki\n+ Tempo + OTel Collector",
+    components: "Prometheus + Grafana + Loki\n+ Tempo + OTel Collector + Langfuse",
     monthlyCost: "~$0 extra",
-    pillars: "Metrics + Logs + Traces",
+    pillars: "Metrics + Logs + System + LLM Traces",
     alerting: "P0/P1/P2 → PagerDuty + Slack",
     ha: "All HA (2+ replicas)",
   },
@@ -158,21 +166,28 @@ const obsPhase1Steps: FlowStep[] = [
     detailZh: "推論日誌、token 計數及 Fargate 資源指標",
   },
   {
-    id: 4, actor: "CloudWatch", action: "evaluate threshold", target: "CloudWatch Alarms",
+    id: 4, actor: "LLM Worker", action: "send LLM traces", target: "Langfuse",
+    detail: "Application records prompt, model, latency, token usage, and response metadata for each managed LLM call",
+    actorType: "worker", targetType: "monitoring",
+    actorZh: "LLM Worker", actionZh: "傳送 LLM 追蹤", targetZh: "Langfuse",
+    detailZh: "應用程式記錄每次託管 LLM 呼叫的 prompt、模型、延遲、token 使用量與回應中繼資料",
+  },
+  {
+    id: 5, actor: "CloudWatch", action: "evaluate threshold", target: "CloudWatch Alarms",
     detail: "Metric math expressions check DLQ > 0, error rate > 5%, CPU > 80%",
     actorType: "monitoring", targetType: "monitoring",
     actorZh: "CloudWatch", actionZh: "評估閾值", targetZh: "CloudWatch Alarms",
     detailZh: "指標數學表達式檢查 DLQ > 0、錯誤率 > 5%、CPU > 80%",
   },
   {
-    id: 5, actor: "CloudWatch Alarms", action: "notify", target: "SNS",
+    id: 6, actor: "CloudWatch Alarms", action: "notify", target: "SNS",
     detail: "ALARM state triggers SNS topic → email/SMS notification to on-call",
     actorType: "monitoring", targetType: "queue",
     actorZh: "CloudWatch Alarms", actionZh: "通知", targetZh: "SNS",
     detailZh: "ALARM 狀態觸發 SNS topic → 寄送 email/SMS 通知值班人員",
   },
   {
-    id: 6, actor: "API Service", action: "expose /health", target: "/health Endpoints",
+    id: 7, actor: "API Service", action: "expose /health", target: "/health Endpoints",
     detail: "Liveness + readiness probes for ECS health checks and ALB target group",
     actorType: "api", targetType: "external",
     actorZh: "API 服務", actionZh: "公開 /health", targetZh: "/health 端點",
@@ -224,14 +239,21 @@ const obsPhase2Steps: FlowStep[] = [
     detailZh: "Grafana 中的 LogQL 查詢：依 pod 篩選、搜尋錯誤、與指標面板關聯",
   },
   {
-    id: 7, actor: "Grafana", action: "P0/P1 alert", target: "PagerDuty",
+    id: 7, actor: "LLM Worker", action: "send LLM traces", target: "Langfuse",
+    detail: "Langfuse captures prompt versions, token usage, latency, model outputs, and per-request evaluation metadata",
+    actorType: "worker", targetType: "monitoring",
+    actorZh: "LLM Worker", actionZh: "傳送 LLM 追蹤", targetZh: "Langfuse",
+    detailZh: "Langfuse 擷取 prompt 版本、token 使用量、延遲、模型輸出與每次請求的評估中繼資料",
+  },
+  {
+    id: 8, actor: "Grafana", action: "P0/P1 alert", target: "PagerDuty",
     detail: "Alert rules evaluate every 1 min; P0 (Critical) and P1 (Warning) route to PagerDuty on-call",
     actorType: "monitoring", targetType: "external",
     actorZh: "Grafana", actionZh: "P0/P1 警報", targetZh: "PagerDuty",
     detailZh: "警報規則每分鐘評估；P0（嚴重）和 P1（警告）路由到 PagerDuty 值班",
   },
   {
-    id: 8, actor: "Grafana", action: "P2 notification", target: "Slack",
+    id: 9, actor: "Grafana", action: "P2 notification", target: "Slack",
     detail: "P2 (Info) alerts sent to Slack #ops-info channel for awareness, no paging",
     actorType: "monitoring", targetType: "external",
     actorZh: "Grafana", actionZh: "P2 通知", targetZh: "Slack",
@@ -276,42 +298,56 @@ const obsPhase3Steps: FlowStep[] = [
     detailZh: "OTLP/gRPC 匯出：分散式追蹤的 trace_id 透過 SQS → Worker → Model Server 傳播",
   },
   {
-    id: 6, actor: "Prometheus", action: "datasource query", target: "Grafana",
+    id: 6, actor: "OTel Collector", action: "export LLM traces", target: "Langfuse",
+    detail: "LLM spans and metadata are enriched with prompt versions, token usage, user/session tags, and evaluation scores before export",
+    actorType: "monitoring", targetType: "monitoring",
+    actorZh: "OTel Collector", actionZh: "匯出 LLM 追蹤", targetZh: "Langfuse",
+    detailZh: "LLM spans 與中繼資料在匯出前補上 prompt 版本、token 使用量、user/session 標籤與評估分數",
+  },
+  {
+    id: 7, actor: "Prometheus", action: "datasource query", target: "Grafana",
     detail: "HA Prometheus pair with deduplication; PromQL powers dashboards + recording rules",
     actorType: "monitoring", targetType: "monitoring",
     actorZh: "Prometheus", actionZh: "資料源查詢", targetZh: "Grafana",
     detailZh: "HA Prometheus 配對搭配去重；PromQL 驅動儀表板 + recording rules",
   },
   {
-    id: 7, actor: "Tempo", action: "trace query", target: "Grafana",
+    id: 8, actor: "Tempo", action: "trace query", target: "Grafana",
     detail: "TraceQL queries + exemplars: click metric spike → jump to exact trace → see per-span breakdown",
     actorType: "monitoring", targetType: "monitoring",
     actorZh: "Tempo", actionZh: "追蹤查詢", targetZh: "Grafana",
     detailZh: "TraceQL 查詢 + exemplars：點擊指標尖峰 → 跳轉至精確追蹤 → 查看每 span 細節",
   },
   {
-    id: 8, actor: "Promtail", action: "ship logs", target: "Loki (Scalable)",
+    id: 9, actor: "Promtail", action: "ship logs", target: "Loki (Scalable)",
     detail: "DaemonSet tails logs, enriches with K8s labels; Loki in microservices mode for horizontal scaling",
     actorType: "monitoring", targetType: "monitoring",
     actorZh: "Promtail", actionZh: "傳送日誌", targetZh: "Loki (Scalable)",
     detailZh: "DaemonSet 追蹤日誌，加入 K8s 標籤；Loki 微服務模式支援水平擴展",
   },
   {
-    id: 9, actor: "Loki", action: "log query", target: "Grafana",
+    id: 10, actor: "Loki", action: "log query", target: "Grafana",
     detail: "LogQL with trace_id correlation: click log line → jump to full distributed trace in Tempo",
     actorType: "monitoring", targetType: "monitoring",
     actorZh: "Loki", actionZh: "日誌查詢", targetZh: "Grafana",
     detailZh: "LogQL 搭配 trace_id 關聯：點擊日誌行 → 跳轉至 Tempo 完整分散式追蹤",
   },
   {
-    id: 10, actor: "Grafana", action: "P0/P1 alert", target: "PagerDuty",
+    id: 11, actor: "Langfuse", action: "trace query", target: "Grafana",
+    detail: "Operators pivot from Langfuse traces to prompt/version analytics for LLM quality, latency, and token-cost investigation",
+    actorType: "monitoring", targetType: "monitoring",
+    actorZh: "Langfuse", actionZh: "追蹤查詢", targetZh: "Grafana",
+    detailZh: "操作人員可由 Langfuse 追蹤切換到 prompt/版本分析，用於調查 LLM 品質、延遲與 token 成本",
+  },
+  {
+    id: 12, actor: "Grafana", action: "P0/P1 alert", target: "PagerDuty",
     detail: "Multi-signal alerts: combine metric threshold + log pattern + trace error rate for high-confidence alerting",
     actorType: "monitoring", targetType: "external",
     actorZh: "Grafana", actionZh: "P0/P1 警報", targetZh: "PagerDuty",
     detailZh: "多信號警報：結合指標閾值 + 日誌模式 + 追蹤錯誤率實現高信心度警報",
   },
   {
-    id: 11, actor: "Grafana", action: "P2 notification", target: "Slack",
+    id: 13, actor: "Grafana", action: "P2 notification", target: "Slack",
     detail: "P2 (Info) alerts to Slack #ops-info; includes Grafana dashboard link for quick context",
     actorType: "monitoring", targetType: "external",
     actorZh: "Grafana", actionZh: "P2 通知", targetZh: "Slack",
