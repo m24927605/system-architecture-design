@@ -68,8 +68,8 @@ graph TB
         Redis["ElastiCache Redis<br/>(Single Node)"]
     end
 
-    User -->|HTTPS| API
-    API -->|presigned URL| S3
+    User -->|HTTPS upload| API
+    API -->|stream audio| S3
     API -->|INSERT task| RDS
     API -->|SET cache| Redis
     API -->|send message| SQS
@@ -333,7 +333,7 @@ graph TB
     end
 
     User --> CF --> ALB --> API
-    API -->|presigned URL| S3
+    API -->|stream audio| S3
     API -->|INSERT task| RDS
     API -->|SET cache| Redis
     API -->|send message| STTQ
@@ -370,7 +370,7 @@ graph TB
 |-----------|-----------------|------------------|-----|
 | **Scaling** | HPA (CPU-based) | KEDA (SQS queue depth) + Cluster Autoscaler | Proactive scaling: workers scale before CPU spikes, based on actual queue backlog |
 | **GPU** | 1 GPU per model (fixed) | Multi-GPU pool (Spot + On-Demand mix) | Horizontal GPU scaling with cost optimization via Spot instances (up to 60% savings) |
-| **CDN** | None | CloudFront | Frontend static assets and presigned URL acceleration |
+| **CDN** | None | CloudFront | Frontend static assets acceleration |
 | **DB** | Multi-AZ only | Multi-AZ + Read Replica | Offload query traffic from primary; support high Query QPS |
 | **Cache** | Multi-AZ | Cluster Mode | Sharded across nodes for higher throughput and larger dataset |
 | **Deployment** | Rolling update | Argo Rollouts canary | Progressive traffic shifting (10% → 30% → 100%) with automatic rollback on metric degradation |
@@ -516,9 +516,8 @@ sequenceDiagram
     participant PG as PostgreSQL
     participant Redis
 
-    User->>API: POST /tasks (upload audio)
-    API->>S3: Generate presigned URL
-    S3-->>API: presigned URL
+    User->>API: POST /tasks (multipart upload)
+    API->>S3: Stream validated audio
     API->>PG: INSERT task (status=pending)
     API->>Redis: SET task cache
     API->>SQS: Send STT task message
@@ -565,15 +564,16 @@ sequenceDiagram
 
 | Step | Action | Data Store | Notes |
 |------|--------|-----------|-------|
-| 1 | User uploads audio | S3 (direct upload via presigned URL) | Bypasses API server — no bandwidth/memory bottleneck |
-| 2 | API creates task record | PostgreSQL `tasks` table (status=pending) | Returns task_id immediately |
-| 3 | Send STT task message | SQS STT Queue | Decouples ingestion from processing |
-| 4 | STT Worker downloads audio, calls model | S3 → STT Model | GPU-bound step (~5-6s per 1-min audio) |
-| 5 | Write transcript result | PostgreSQL (transcript column, status=llm_processing) | Write-then-ACK pattern |
-| 6 | Send LLM task message | SQS LLM Queue | Second stage of pipeline |
-| 7 | LLM Worker reads transcript, calls model | PostgreSQL → LLM Model | GPU-bound step (~1-2s per task) |
-| 8 | Write summary result | PostgreSQL (summary column, status=done) | Final state |
-| 9 | User queries result | Redis cache → PostgreSQL fallback | < 5ms on cache hit |
+| 1 | User uploads audio to API | API Service | Multipart upload with auth and validation |
+| 2 | API streams validated audio to object storage | S3 | Stores object and records `s3_key` for downstream workers |
+| 3 | API creates task record | PostgreSQL `tasks` table (status=pending) | Returns task_id immediately |
+| 4 | Send STT task message | SQS STT Queue | Decouples ingestion from processing |
+| 5 | STT Worker downloads audio, calls model | S3 → STT Model | GPU-bound step (~5-6s per 1-min audio) |
+| 6 | Write transcript result | PostgreSQL (transcript column, status=llm_processing) | Write-then-ACK pattern |
+| 7 | Send LLM task message | SQS LLM Queue | Second stage of pipeline |
+| 8 | LLM Worker reads transcript, calls model | PostgreSQL → LLM Model | GPU-bound step (~1-2s per task) |
+| 9 | Write summary result | PostgreSQL (summary column, status=done) | Final state |
+| 10 | User queries result | Redis cache → PostgreSQL fallback | < 5ms on cache hit |
 
 ### Task State Machine
 
@@ -618,10 +618,10 @@ stateDiagram-v2
 |-------------|------------|-----------|------------------------|
 | **Container Orchestration** | EKS (Phase 2+) / ECS Fargate (Phase 1) | EKS: GPU node groups, HPA/KEDA, rich ecosystem. Fargate: zero ops for MVP. | Self-managed K8s (high ops burden), Docker Compose (no auto-scaling) |
 | **Message Queue** | SQS | Fully managed, native DLQ, visibility timeout, no broker to manage. Scales automatically. | See comparison below |
-| **Object Storage** | S3 | Presigned URL direct upload, lifecycle policies, 11 nines durability. | EFS (overkill for blob storage), local disk (not durable) |
+| **Object Storage** | S3 | API-mediated streaming upload, lifecycle policies, 11 nines durability. | EFS (overkill for blob storage), local disk (not durable) |
 | **RDBMS** | RDS PostgreSQL | ACID for task state consistency. Multi-AZ automatic failover. Mature ecosystem. | Aurora (higher cost for this scale), DynamoDB (no relational queries on tasks) |
 | **Cache** | ElastiCache Redis | Sub-ms latency for task cache, rate limiting, idempotency locks. | Memcached (no persistence, no pub/sub), DynamoDB DAX (DDB-only) |
-| **CDN** | CloudFront (Phase 3) | Static frontend acceleration, presigned URL caching. | Cloudflare (cross-cloud complexity) |
+| **CDN** | CloudFront (Phase 3) | Static frontend acceleration. | Cloudflare (cross-cloud complexity) |
 | **Load Balancer** | ALB | Layer 7 routing, WebSocket support for task progress. | NLB (Layer 4 only, no WebSocket routing) |
 
 ### 4.3 Why SQS over Kafka or RabbitMQ?
@@ -801,7 +801,7 @@ flowchart LR
 | Strategy | Description | Impact |
 |----------|------------|--------|
 | **Async Processing + WebSocket** | API returns task_id immediately (< 200ms). Optionally pushes real-time progress via WebSocket. | Users are never blocked waiting for GPU processing. |
-| **S3 Presigned URL Direct Upload** | Audio files upload directly to S3, bypassing the API server entirely. | Eliminates API server as a bandwidth bottleneck for large files. |
+| **API-Mediated Streaming Upload** | Clients upload audio to the API, which validates the stream and writes it to S3-compatible object storage. | Keeps content validation and auth checks in the server path while still avoiding full-buffer uploads. |
 | **vLLM Continuous Batching** | vLLM dynamically batches multiple concurrent LLM requests. | 3-5x throughput improvement over naive sequential inference. |
 | **Redis Result Cache** | Completed task results cached in Redis. | Query latency < 5ms on cache hit (vs. ~10-50ms DB query). |
 | **Connection Pooling** | Go workers maintain persistent connection pools to DB, Redis, and model servers. | Eliminates per-request connection overhead. |
@@ -824,7 +824,7 @@ flowchart LR
 | Layer | Measure | Details |
 |-------|---------|---------|
 | **API Authentication** | JWT tokens (short-lived) + API Keys | JWT for user sessions, API keys for service-to-service. Unified validation via Echo middleware. |
-| **S3 Access** | Presigned URLs (15-min expiry) | Bucket policy denies all public access. Presigned URLs scoped to specific object key. |
+| **S3 Access** | Private bucket via API-managed writes | Bucket policy denies all public access. Only the API/worker runtime can write/read objects. |
 | **Transport Encryption** | End-to-end HTTPS/TLS | TLS 1.2+ terminated at ALB. Internal traffic encrypted in transit within VPC. |
 | **At-rest Encryption** | S3 SSE-S3, RDS storage encryption | AES-256. Encryption enabled by default on all data stores. |
 | **Network Isolation** | VPC private subnets | Model servers, databases, and Redis are in private subnets. Only the ALB is in a public subnet. Workers access model servers via private IPs. |

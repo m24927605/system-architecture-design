@@ -58,13 +58,13 @@ function getPhaseThroughputLabel(phaseKey: string): string {
 /* ------------------------------------------------------------------ */
 const phase1: PhaseData = {
   nodes: [
-    { id: "user", label: "User", type: "user", position: { x: 40, y: 220 }, steps: [1, 2, 8] },
+    { id: "user", label: "User", type: "user", position: { x: 40, y: 220 }, steps: [1, 8] },
     {
       id: "api",
       label: "API Service\n(ECS Fargate, Go+Echo)",
       type: "api",
       position: { x: 200, y: 220 },
-      steps: [1, 3, 4, 8],
+      steps: [1, 2, 3, 4, 8],
     },
     {
       id: "s3",
@@ -125,7 +125,7 @@ const phase1: PhaseData = {
   ],
   edges: [
     { id: "e-user-api", source: "user", target: "api" },
-    { id: "e-user-s3", source: "user", target: "s3" },
+    { id: "e-api-s3", source: "api", target: "s3" },
     { id: "e-api-sqs", source: "api", target: "sqs" },
     { id: "e-sqs-stt", source: "sqs", target: "stt-worker" },
     { id: "e-stt-llm", source: "stt-worker", target: "llm-worker" },
@@ -148,7 +148,7 @@ const phase1: PhaseData = {
 /* ------------------------------------------------------------------ */
 const phase2: PhaseData = {
   nodes: [
-    { id: "user", label: "User", type: "user", position: { x: 20, y: 210 }, steps: [1, 2, 9] },
+    { id: "user", label: "User", type: "user", position: { x: 20, y: 210 }, steps: [1, 9] },
     {
       id: "alb",
       label: "ALB",
@@ -161,7 +161,7 @@ const phase2: PhaseData = {
       label: "API Service\n(EKS)",
       type: "api",
       position: { x: 260, y: 210 },
-      steps: [1, 3, 4, 9],
+      steps: [1, 2, 3, 4, 9],
     },
     {
       id: "stt-queue",
@@ -236,7 +236,7 @@ const phase2: PhaseData = {
   ],
   edges: [
     { id: "e-user-alb", source: "user", target: "alb" },
-    { id: "e-user-s3", source: "user", target: "s3" },
+    { id: "e-api-s3", source: "api", target: "s3" },
     { id: "e-alb-api", source: "alb", target: "api" },
     { id: "e-api-stt-q", source: "api", target: "stt-queue" },
     { id: "e-stt-q-worker", source: "stt-queue", target: "stt-worker" },
@@ -266,7 +266,7 @@ const phase2: PhaseData = {
 /* ------------------------------------------------------------------ */
 const phase3: PhaseData = {
   nodes: [
-    { id: "user", label: "User", type: "user", position: { x: 10, y: 220 }, steps: [1, 2, 9] },
+    { id: "user", label: "User", type: "user", position: { x: 10, y: 220 }, steps: [1, 9] },
     {
       id: "cloudfront",
       label: "CloudFront",
@@ -286,7 +286,7 @@ const phase3: PhaseData = {
       label: "API Service\n(HPA)",
       type: "api",
       position: { x: 310, y: 220 },
-      steps: [1, 3, 4, 9],
+      steps: [1, 2, 3, 4, 9],
     },
     {
       id: "stt-queue",
@@ -361,7 +361,7 @@ const phase3: PhaseData = {
   ],
   edges: [
     { id: "e-user-cf", source: "user", target: "cloudfront" },
-    { id: "e-user-s3", source: "user", target: "s3" },
+    { id: "e-api-s3", source: "api", target: "s3" },
     { id: "e-cf-alb", source: "cloudfront", target: "alb" },
     { id: "e-alb-api", source: "alb", target: "api" },
     { id: "e-api-stt-q", source: "api", target: "stt-queue" },
