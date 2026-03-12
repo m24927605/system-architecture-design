@@ -38,16 +38,12 @@ User → API (ECS Fargate, Go+Echo)
          ├── S3 (presigned URL for direct audio upload)
          ├── PostgreSQL (INSERT task, status=pending)
          ├── Redis (SET cache)
-         └── SQS (send STT message)
+         └── SQS (send task message)
 
-SQS → STT Worker (ECS Fargate)
+SQS → Worker (ECS Fargate)
          ├── Call AWS Transcribe
-         ├── UPDATE PostgreSQL (transcript)
-         └── Send LLM message → SQS
-
-SQS → LLM Worker (ECS Fargate)
          ├── Call Amazon Bedrock
-         ├── UPDATE PostgreSQL (summary, status=done)
+         ├── UPDATE PostgreSQL (transcript + summary, status=done)
          └── Invalidate Redis cache
 
 User → API → Redis (cache hit) or PostgreSQL (cache miss) → Return result
@@ -99,7 +95,7 @@ User → API → Redis (cache hit) or PostgreSQL (cache miss) → Return result
 
 ## Sequence Diagram Key Points
 
-The task flow is **logically identical** across all three phases — only the underlying infrastructure changes:
+The user-facing workflow is identical across all three phases, but the execution model changes: MVP uses one worker to run STT then LLM after a single dequeue, while Phase 2+ splits the pipeline into separate STT and LLM workers.
 
 ```
 1. User → POST /tasks → API receives request
@@ -108,19 +104,14 @@ The task flow is **logically identical** across all three phases — only the un
 4. API → SQS Send Message → Immediately returns 201 {task_id}
    (API response complete here, < 200ms)
 
-5. STT Worker polls SQS message
+5. Worker polls SQS message
 6. Redis SETNX idempotency lock (prevent duplicate processing)
 7. Call STT model → get transcript
-8. PostgreSQL UPDATE (transcript, status=llm_processing)
-9. Send LLM message to SQS → ACK original message
+8. Call LLM model → get summary
+9. PostgreSQL UPDATE (transcript, summary, status=done)
+10. Invalidate Redis cache → ACK message
 
-10. LLM Worker polls SQS message
-11. Redis SETNX idempotency lock
-12. Read transcript from PostgreSQL
-13. Call LLM model → get summary
-14. PostgreSQL UPDATE (summary, status=done) → ACK message
-
-15. User → GET /tasks/{id} → Redis cache hit (< 5ms) or DB fallback
+11. User → GET /tasks/{id} → Redis cache hit (< 5ms) or DB fallback
 ```
 
 **Key pattern: Write-then-ACK**

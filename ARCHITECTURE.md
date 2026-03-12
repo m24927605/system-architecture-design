@@ -49,8 +49,7 @@ graph TB
 
     subgraph Compute["Compute (ECS Fargate)"]
         API["API Service<br/>(Node.js + Fastify)<br/>Fargate Task"]
-        STTW["STT Worker<br/>(Node.js)<br/>Fargate Task"]
-        LLMW["LLM Worker<br/>(Node.js)<br/>Fargate Task"]
+        W["Worker<br/>(Node.js)<br/>Fargate Task"]
     end
 
     subgraph ManagedAI["Managed AI Services"]
@@ -74,15 +73,11 @@ graph TB
     API -->|SET cache| Redis
     API -->|send message| SQS
 
-    SQS --> STTW
-    STTW -->|call| Transcribe
-    STTW -->|UPDATE| RDS
-    STTW -->|send LLM message| SQS
-
-    SQS --> LLMW
-    LLMW -->|call| Bedrock
-    LLMW -->|UPDATE| RDS
-    LLMW -->|invalidate| Redis
+    SQS --> W
+    W -->|call STT| Transcribe
+    W -->|call LLM| Bedrock
+    W -->|UPDATE transcript + summary| RDS
+    W -->|invalidate| Redis
 ```
 
 #### Design Rationale
@@ -90,7 +85,7 @@ graph TB
 - **ECS Fargate over EKS:** No cluster to manage, no EC2 instances to patch. Fargate bills per-second for actual usage. At this scale, EKS control plane ($73/month) + node management overhead is not justified.
 - **AWS Transcribe over self-hosted Whisper:** No GPU nodes needed. Pay-per-minute pricing is acceptable below 50K tasks/month. Zero model management.
 - **Amazon Bedrock over self-hosted LLM:** Same rationale — no GPU. Access to frontier models (Claude, Titan) without infrastructure.
-- **Single SQS Queue:** At low volume, a single queue with message attributes to distinguish STT vs. LLM tasks is simpler than two queues. Workers filter by attribute.
+- **Single SQS Queue + Single Worker:** At low volume, one queue and one worker process per task is simpler than splitting STT and LLM into separate queues and consumers. Each dequeued task runs Transcribe first, then Bedrock, within the same worker.
 - **Single-AZ RDS:** Multi-AZ doubles RDS cost. For a POC, planned downtime during failover is acceptable.
 - **Single-node Redis:** No replication needed at this scale.
 
@@ -99,8 +94,7 @@ graph TB
 | Resource | Spec | Monthly Cost (est.) |
 |----------|------|-------------------|
 | ECS Fargate (API) | 0.5 vCPU, 1 GB, always-on | ~$15 |
-| ECS Fargate (STT Worker) | 0.5 vCPU, 1 GB, always-on | ~$15 |
-| ECS Fargate (LLM Worker) | 0.5 vCPU, 1 GB, always-on | ~$15 |
+| ECS Fargate (Worker) | 0.5 vCPU, 1 GB, always-on | ~$15 |
 | AWS Transcribe | 50K min audio @ $0.024/min | ~$1,200 |
 | Amazon Bedrock (Claude Haiku) | 50K calls @ ~$0.003/call | ~$150 |
 | RDS PostgreSQL | db.t4g.micro, Single-AZ, 20 GB | ~$15 |
@@ -498,9 +492,57 @@ This crossover directly maps to our Phase 1 → Phase 2 upgrade trigger: **when 
 
 ## 3. Task Flow
 
-The task processing flow is consistent across all three phases — only the underlying infrastructure changes. The sequence diagram below shows the full async processing pipeline.
+The user-facing API flow is the same across all phases, but the async execution model changes. Phase 1 keeps orchestration inside one worker after a single dequeue. Phase 2 and Phase 3 split the pipeline into STT and LLM stages with separate queues.
 
-### Sequence Diagram
+### Phase 1: MVP Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant API as API Service
+    participant S3
+    participant SQS as SQS (Single Queue)
+    participant W as Worker
+    participant Transcribe as AWS Transcribe
+    participant Bedrock as Amazon Bedrock
+    participant PG as PostgreSQL
+    participant Redis
+
+    User->>API: POST /tasks (multipart upload)
+    API->>S3: Stream validated audio
+    API->>PG: INSERT task (status=pending)
+    API->>Redis: SET task cache
+    API->>SQS: Send task message
+    API-->>User: 201 {task_id, status: "pending"}
+
+    Note over SQS,W: Async Processing — Single Worker
+
+    SQS->>W: Poll message
+    W->>Redis: SETNX idempotency lock
+    W->>S3: Download audio
+    W->>Transcribe: Start / poll transcription
+    Transcribe-->>W: transcript text
+    W->>Bedrock: Summarize transcript
+    Bedrock-->>W: summary text
+    W->>PG: UPDATE status=done, transcript, summary
+    W->>Redis: Invalidate task cache
+    W->>SQS: ACK (delete message)
+
+    Note over User,Redis: Query Phase
+
+    User->>API: GET /tasks/{id}
+    API->>Redis: Check cache
+    alt Cache Hit
+        Redis-->>API: task data
+    else Cache Miss
+        API->>PG: SELECT task
+        PG-->>API: task data
+        API->>Redis: SET task cache
+    end
+    API-->>User: 200 {task with transcript & summary}
+```
+
+### Phase 2-3 Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -545,35 +587,28 @@ sequenceDiagram
     LLMW->>PG: UPDATE status=done, summary
     LLMW->>Redis: Invalidate task cache
     LLMW->>LLMQ: ACK (delete message)
-
-    Note over User,Redis: Query Phase
-
-    User->>API: GET /tasks/{id}
-    API->>Redis: Check cache
-    alt Cache Hit
-        Redis-->>API: task data
-    else Cache Miss
-        API->>PG: SELECT task
-        PG-->>API: task data
-        API->>Redis: SET task cache
-    end
-    API-->>User: 200 {task with transcript & summary}
 ```
 
 ### Data Flow Summary
 
-| Step | Action | Data Store | Notes |
-|------|--------|-----------|-------|
-| 1 | User uploads audio to API | API Service | Multipart upload with auth and validation |
-| 2 | API streams validated audio to object storage | S3 | Stores object and records `s3_key` for downstream workers |
-| 3 | API creates task record | PostgreSQL `tasks` table (status=pending) | Returns task_id immediately |
-| 4 | Send STT task message | SQS STT Queue | Decouples ingestion from processing |
-| 5 | STT Worker downloads audio, calls model | S3 → STT Model | GPU-bound step (~5-6s per 1-min audio) |
-| 6 | Write transcript result | PostgreSQL (transcript column, status=llm_processing) | Write-then-ACK pattern |
-| 7 | Send LLM task message | SQS LLM Queue | Second stage of pipeline |
-| 8 | LLM Worker reads transcript, calls model | PostgreSQL → LLM Model | GPU-bound step (~1-2s per task) |
-| 9 | Write summary result | PostgreSQL (summary column, status=done) | Final state |
-| 10 | User queries result | Redis cache → PostgreSQL fallback | < 5ms on cache hit |
+| Phase | Step | Action | Data Store | Notes |
+|------|------|--------|-----------|-------|
+| MVP | 1 | User uploads audio to API | API Service | Multipart upload with auth and validation |
+| MVP | 2 | API streams validated audio to object storage | S3 | Stores object and records `s3_key` |
+| MVP | 3 | API creates task record | PostgreSQL `tasks` table (status=pending) | Returns `task_id` immediately |
+| MVP | 4 | Send task message | SQS single queue | One dequeue drives the full workflow |
+| MVP | 5 | Worker downloads audio, calls Transcribe, then Bedrock | S3 -> Managed AI | STT then LLM in the same process |
+| MVP | 6 | Write transcript + summary, invalidate cache, ACK | PostgreSQL + Redis + SQS | Single write-then-ACK completion path |
+| Growth/Scale | 1 | User uploads audio to API | API Service | Same client-facing entrypoint |
+| Growth/Scale | 2 | API streams validated audio to object storage | S3 | Stores object and records `s3_key` for STT workers |
+| Growth/Scale | 3 | API creates task record | PostgreSQL `tasks` table (status=pending) | Returns `task_id` immediately |
+| Growth/Scale | 4 | Send STT task message | SQS STT Queue | Decouples ingestion from STT |
+| Growth/Scale | 5 | STT Worker downloads audio, calls model | S3 -> STT Model | GPU-bound step (~5-6s per 1-min audio) |
+| Growth/Scale | 6 | Write transcript result | PostgreSQL (transcript, status=llm_processing) | Write-then-ACK pattern |
+| Growth/Scale | 7 | Send LLM task message | SQS LLM Queue | Second stage of pipeline |
+| Growth/Scale | 8 | LLM Worker reads transcript, calls model | PostgreSQL -> LLM Model | GPU-bound step (~1-2s per task) |
+| Growth/Scale | 9 | Write summary result | PostgreSQL (summary, status=done) | Final state |
+| All | 10 | User queries result | Redis cache -> PostgreSQL fallback | < 5ms on cache hit |
 
 ### Task State Machine
 
@@ -581,22 +616,21 @@ sequenceDiagram
 stateDiagram-v2
     [*] --> pending: Task Created
 
-    pending --> stt_processing: STT Worker picks up
+    pending --> done: MVP Worker completes STT + LLM
 
+    pending --> stt_processing: Phase 2+ STT Worker picks up
     stt_processing --> llm_processing: STT done, sent to LLM Queue
     stt_processing --> failed: STT error (timeout, model error)
-
     llm_processing --> done: LLM summarization complete
     llm_processing --> failed: LLM error (timeout, model error)
 
+    done --> [*]
     failed --> pending: Retry (max 3 times via SQS redelivery)
     failed --> dead_letter: Retry exhausted (maxReceiveCount)
-
-    done --> [*]
     dead_letter --> [*]: Manual intervention required
 ```
 
-**State transitions are strictly enforced in the database via status column constraints.** Each worker validates the expected current state before transitioning, preventing race conditions in concurrent processing.
+**State transitions are enforced in the database via status column checks.** MVP has the simplest path (`pending -> done`), while Growth/Scale introduce explicit intermediate states so STT and LLM stages can scale and retry independently.
 
 ---
 
