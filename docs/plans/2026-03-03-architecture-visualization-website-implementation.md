@@ -351,7 +351,7 @@ Create `web/src/messages/zh.json`:
     "title": "技術選型",
     "subtitle": "每個選擇都有取捨 — 以下是我們的決策理由",
     "chosen": "選擇",
-    "alternatives": "替代方案",
+    "alternatives": "候選方案比較",
     "rationale": "決策理由"
   },
   "traits": {
