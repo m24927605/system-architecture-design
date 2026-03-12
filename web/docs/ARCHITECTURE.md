@@ -48,9 +48,9 @@ graph TB
     end
 
     subgraph Compute["Compute (ECS Fargate)"]
-        API["API Service<br/>(Go + Echo)<br/>Fargate Task"]
-        STTW["STT Worker<br/>(Go)<br/>Fargate Task"]
-        LLMW["LLM Worker<br/>(Go)<br/>Fargate Task"]
+        API["API Service<br/>(Node.js + Fastify)<br/>Fargate Task"]
+        STTW["STT Worker<br/>(Node.js)<br/>Fargate Task"]
+        LLMW["LLM Worker<br/>(Node.js)<br/>Fargate Task"]
     end
 
     subgraph ManagedAI["Managed AI Services"]
@@ -605,11 +605,11 @@ stateDiagram-v2
 
 | Technology | Choice | Rationale | Alternatives Considered |
 |-----------|--------|-----------|------------------------|
-| **API Service** | Go + Echo | Echo is lightweight with mature middleware (auth, CORS, rate limiting). Go's goroutines handle high concurrency with minimal memory (~2KB per goroutine vs. ~1MB per OS thread). Well-suited for I/O-bound API servers. | Gin (similar perf, less middleware), Fiber (fasthttp-based, less standard), Node.js (higher memory, callback complexity) |
-| **Workers** | Go | Workers spend most time waiting for HTTP responses from model servers — goroutines excel at this I/O wait pattern. Single binary deployment simplifies container images. | Python (natural for ML but poor concurrency), Java (higher memory footprint), Rust (overkill for HTTP-call orchestration) |
+| **API Service** | Phase 1: Node.js + Fastify; Phase 2+: Go + Echo | MVP follows the `stt-summary-server` reference stack for fast iteration, TypeScript ergonomics, and mature multipart upload handling. Growth/Scale switch to Go + Echo for lower memory overhead, stronger concurrency, and simpler single-binary deployment under sustained load. | Express (slower, less efficient), Gin (similar to Echo), Fiber (fasthttp-based, less standard) |
+| **Workers** | Phase 1: Node.js; Phase 2+: Go | MVP reuses the same Node.js stack as the reference implementation to minimize build complexity. After validation, workers move to Go because they are mainly I/O orchestrators calling model servers, where goroutines and lower memory usage matter more at scale. | Python (natural for ML but poor concurrency), Java (higher memory footprint), Rust (overkill for HTTP-call orchestration) |
 | **Frontend** | React + TypeScript | Industry standard, large ecosystem, built with Vite. The frontend is not the focus of this architecture. | — |
 
-**Why Go over Python for Workers?** The workers do not run ML models directly — they are HTTP clients that call model server APIs. Go's advantages (low memory, fast startup, simple deployment, excellent concurrency) outweigh Python's ML ecosystem advantage, which is irrelevant for HTTP call orchestration.
+**Why migrate from Node.js in MVP to Go in Growth/Scale?** The MVP optimizes for delivery speed and alignment with the existing `stt-summary-server` implementation. Once throughput and infrastructure complexity grow, Go becomes the better fit for API and worker services because the hot path is dominated by queue polling, HTTP calls, and database/cache I/O rather than in-process ML execution.
 
 ### 4.2 Cloud Services (AWS)
 

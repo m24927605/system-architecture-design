@@ -61,7 +61,7 @@ const phase1: PhaseData = {
     { id: "user", label: "User", type: "user", position: { x: 40, y: 220 }, steps: [1, 8] },
     {
       id: "api",
-      label: "API Service\n(ECS Fargate, Go+Echo)",
+      label: "API Service\n(ECS Fargate, Node.js+Fastify)",
       type: "api",
       position: { x: 200, y: 220 },
       steps: [1, 2, 3, 4, 8],
@@ -82,14 +82,14 @@ const phase1: PhaseData = {
     },
     {
       id: "stt-worker",
-      label: "STT Worker\n(Fargate)",
+      label: "STT Worker\n(Node.js Worker)",
       type: "worker",
       position: { x: 560, y: 220 },
       steps: [5, 10],
     },
     {
       id: "llm-worker",
-      label: "LLM Worker\n(Fargate)",
+      label: "LLM Worker\n(Node.js Worker)",
       type: "worker",
       position: { x: 740, y: 220 },
       steps: [6, 10],

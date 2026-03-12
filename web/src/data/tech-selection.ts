@@ -361,25 +361,25 @@ export const techCategories: TechCategory[] = [
     phases: [
       {
         phase: 1,
-        chosen: "Go + Echo",
+        chosen: "Node.js + Fastify",
         rationale:
-          "Goroutines (~2KB each) excel at I/O-bound HTTP calls. Single binary ~10MB Docker image. Echo provides mature middleware.",
+          "Matches the MVP reference implementation (`stt-summary-server`). Fastify gives a compact TypeScript-friendly stack, strong multipart support, and fast iteration for validating the product before optimizing the runtime.",
         rationaleZh:
-          "Goroutine（~2KB/個）擅長 I/O 密集 HTTP 呼叫。單一二進位 ~10MB Docker image。Echo 提供成熟中介層。",
+          "符合 MVP 參考實作（`stt-summary-server`）。Fastify 提供精簡且對 TypeScript 友善的技術棧、成熟的 multipart 支援，以及更快的產品驗證迭代速度。",
       },
       {
         phase: 2,
         chosen: "Go + Echo",
-        rationale: "Same. Workers remain HTTP clients calling model servers — Go's strengths unchanged.",
-        rationaleZh: "不變。Worker 仍是呼叫 Model Server 的 HTTP 客戶端 — Go 的優勢不變。",
+        rationale: "Once the product is validated, move the API and workers to Go + Echo for lower memory overhead, simpler single-binary deployment, and stronger concurrency under sustained queue-driven load.",
+        rationaleZh: "產品驗證後，將 API 與 Worker 遷移到 Go + Echo，以取得更低記憶體開銷、更簡單的單一二進位部署，以及更穩定的佇列驅動高併發能力。",
       },
       {
         phase: 3,
         chosen: "Go + Echo + TaskProcessor Interface",
         rationale:
-          "Added plug-in interface for extensible AI task types. New processors (sentiment, NER) registered without modifying core.",
+          "Keeps the Go runtime advantages from Phase 2 and adds a plug-in interface for extensible AI task types. New processors (sentiment, NER) register without modifying the core pipeline.",
         rationaleZh:
-          "新增 plug-in 介面支援可擴展 AI 任務類型。新處理器（情感分析、NER）註冊即可，不修改核心。",
+          "延續 Phase 2 的 Go 執行時優勢，並加入 plug-in 介面支援可擴展 AI 任務類型。新處理器（情感分析、NER）註冊即可，不修改核心。",
       },
     ],
     alternatives: [
